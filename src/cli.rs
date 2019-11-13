@@ -1,16 +1,23 @@
+use std::mem;
+
 use clap::{clap_app, crate_description, ArgMatches};
+use tokei::{Config, LanguageType, Sort};
 
 use crate::{cli_utils::*, input::Format};
-use tokei::{LanguageType, Sort};
 
+#[derive(Debug)]
 pub struct Cli<'a> {
     matches: ArgMatches<'a>,
-    pub output: Option<Format>,
+    pub columns: Option<usize>,
     pub files: bool,
+    pub hidden: bool,
+    pub no_ignore: bool,
+    pub no_ignore_parent: bool,
+    pub no_ignore_vcs: bool,
+    pub output: Option<Format>,
     pub print_languages: bool,
     pub sort: Option<Sort>,
     pub types: Option<Vec<LanguageType>>,
-    pub columns: Option<usize>,
     pub verbose: u64,
 }
 
@@ -18,7 +25,7 @@ impl<'a> Cli<'a> {
     pub fn from_args() -> Self {
         let matches = clap_app!(tokei =>
             (version: &*crate_version())
-            (author: "Aaron P. <theaaronepower@gmail.com> + Contributors")
+            (author: "Erin P. <xampprocky@gmail.com> + Contributors")
             (about: crate_description!())
             (@arg columns: -c --columns
                 +takes_value
@@ -28,19 +35,26 @@ impl<'a> Cli<'a> {
             (@arg exclude: -e --exclude
                 +takes_value
                 +multiple number_of_values(1)
-                "Ignore all files & directories containing the word.")
+                "Ignore all files & directories matching the pattern.")
             (@arg files: -f --files
                 "Will print out statistics on individual files.")
             (@arg file_input: -i --input
                 +takes_value
                 "Gives statistics from a previous tokei run. Can be given a file path, \
                 or \"stdin\" to read from stdin.")
+            (@arg hidden: --hidden "Count hidden files.")
             (@arg input:
                 conflicts_with[languages] ...
-                "The input file(s)/directory(ies) to be counted.")
+                "The path(s) to the file or directory to be counted.")
             (@arg languages: -l --languages
                 conflicts_with[input]
                 "Prints out supported languages and their extensions.")
+            (@arg no_ignore: --("no-ignore")
+                "Don't respect ignore files.")
+            (@arg no_ignore_parent: --("no-ignore-parent")
+                "Don't respect ignore files in parent directories.")
+            (@arg no_ignore_vcs: --("no-ignore-vcs")
+                "Don't respect VCS ignore files.")
             (@arg output: -o --output
                 // `all` is used so to fail later with a better error
                 possible_values(Format::all())
@@ -60,17 +74,22 @@ impl<'a> Cli<'a> {
             1: to show unknown file extensions,
             2: reserved for future debugging,
             3: enable file level trace. Not recommended on multiple files")
-        ).get_matches();
+        )
+        .get_matches();
 
         let columns = matches.value_of("columns").map(parse_or_exit::<usize>);
         let files = matches.is_present("files");
+        let hidden = matches.is_present("hidden");
+        let no_ignore = matches.is_present("no_ignore");
+        let no_ignore_parent = matches.is_present("no_ignore_parent");
+        let no_ignore_vcs = matches.is_present("no_ignore_vcs");
         let print_languages = matches.is_present("languages");
         let verbose = matches.occurrences_of("verbose");
         let types = matches.value_of("types").map(|e| {
             e.split(',')
-             .map(|t| t.parse::<LanguageType>())
-             .filter_map(Result::ok)
-             .collect()
+                .map(|t| t.parse::<LanguageType>())
+                .filter_map(Result::ok)
+                .collect()
         });
 
         // Sorting category should be restricted by clap but parse before we do
@@ -79,22 +98,31 @@ impl<'a> Cli<'a> {
         // Format category is overly accepting by clap (so the user knows what
         // is supported) but this will fail if support is not compiled in and
         // give a useful error to the user.
-        let output = matches.value_of("output")
-                            .map(parse_or_exit::<Format>);
+        let output = matches.value_of("output").map(parse_or_exit::<Format>);
 
-        Cli {
-            matches,
-            output,
+        crate::cli_utils::setup_logger(verbose);
+
+        let cli = Cli {
+            columns,
             files,
+            hidden,
+            matches,
+            no_ignore,
+            no_ignore_parent,
+            no_ignore_vcs,
+            output,
             print_languages,
             sort,
             types,
             verbose,
-            columns,
-        }
+        };
+
+        debug!("CLI Config: {:#?}", cli);
+
+        cli
     }
 
-    pub fn file_input(&self) ->  Option<&str> {
+    pub fn file_input(&self) -> Option<&str> {
         self.matches.value_of("file_input")
     }
 
@@ -119,12 +147,52 @@ impl<'a> Cli<'a> {
         }
     }
 
+    /// Overrides the shared options (See `tokei::Config` for option
+    /// descriptions) between the CLI and the config files. CLI flags have
+    /// higher precedence than options present in config files.
+    ///
+    /// #### Shared options
+    /// * `no_ignore`
+    /// * `no_ignore_parent`
+    /// * `no_ignore_vcs`
+    /// * `types`
+    pub fn override_config(&mut self, mut config: Config) -> Config {
+        config.hidden = if self.hidden {
+            Some(true)
+        } else {
+            config.hidden
+        };
+
+        config.no_ignore = if self.no_ignore {
+            Some(true)
+        } else {
+            config.no_ignore
+        };
+
+        config.no_ignore_parent = if self.no_ignore_parent {
+            Some(true)
+        } else {
+            config.no_ignore_parent
+        };
+
+        config.no_ignore_vcs = if self.no_ignore_vcs {
+            Some(true)
+        } else {
+            config.no_ignore_vcs
+        };
+
+        config.types = mem::replace(&mut self.types, None).or(config.types);
+
+        config
+    }
+
     pub fn print_input_parse_failure(input_filename: &str) {
         eprintln!("Error:\n Failed to parse input file: {}", input_filename);
 
         let not_supported = Format::not_supported();
         if !not_supported.is_empty() {
-            eprintln!("
+            eprintln!(
+                "
 This version of tokei was compiled without serialization support for the following formats:
 
     {not_supported}
@@ -137,11 +205,10 @@ Or use the 'all' feature:
 
     cargo install tokei --features all
     \n",
-    not_supported = not_supported.join(", "),
-    // no space after comma to ease copypaste
-    all = self::Format::all_feature_names().join(",")
-    );
+                not_supported = not_supported.join(", "),
+                // no space after comma to ease copypaste
+                all = self::Format::all_feature_names().join(",")
+            );
         }
     }
 }
-

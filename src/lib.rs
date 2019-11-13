@@ -2,7 +2,7 @@
 //!
 //! A simple, efficient library for counting code in directories. This
 //! functionality is also provided as a
-//! [CLI utility](//github.com/Aaronepower/tokei). Tokei uses a small state
+//! [CLI utility](//github.com/XAMPPRocky/tokei). Tokei uses a small state
 //! machine rather than regular expressions found in other code counters. Tokei
 //! can accurately count a lot more edge cases such as nested comments, or
 //! comment syntax inside string literals.
@@ -23,7 +23,7 @@
 //!
 //! fn main() {
 //!     // The paths to search. Accepts absolute, relative, and glob paths.
-//!     let paths = &["**/*.rs"];
+//!     let paths = &["src", "tests"];
 //!     // Exclude any path that contains any of these strings.
 //!     let excluded = &["target"];
 //!     // `Config` allows you to configure what is searched and counted.
@@ -37,23 +37,30 @@
 //! }
 //! ```
 
- #![deny(trivial_casts,
-         trivial_numeric_casts,
-         unused_variables,
-         unstable_features,
-         unused_import_braces,
-         missing_docs)]
+#![deny(
+    trivial_casts,
+    trivial_numeric_casts,
+    unused_variables,
+    unstable_features,
+    unused_import_braces,
+    missing_docs
+)]
 
-#[macro_use] extern crate log;
-#[macro_use] extern crate serde_derive;
+#[macro_use]
+extern crate log;
+#[macro_use]
+extern crate serde_derive;
 
-#[macro_use] mod utils;
+#[macro_use]
+mod utils;
 mod config;
 mod language;
 mod sort;
 mod stats;
 
-pub use self::language::{LanguageType, Languages, Language};
-pub use self::stats::Stats;
-pub use self::sort::Sort;
-pub use self::config::Config;
+pub use self::{
+    config::Config,
+    language::{Language, LanguageType, Languages},
+    sort::Sort,
+    stats::Stats,
+};

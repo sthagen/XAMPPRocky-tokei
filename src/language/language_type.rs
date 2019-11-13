@@ -1,18 +1,23 @@
-use std::borrow::Cow;
-use std::fmt;
-use std::path::{Path, PathBuf};
-use std::fs::File;
-use std::io::{self, Read, BufRead, BufReader};
-use std::str::FromStr;
+use std::{
+    borrow::Cow,
+    fmt,
+    fs::File,
+    io::{self, BufRead, BufReader, Read},
+    path::{Path, PathBuf},
+    str::FromStr,
+};
 
-use encoding_rs_io::DecodeReaderBytes;
+use encoding_rs_io::DecodeReaderBytesBuilder;
+use grep_searcher::LineIter;
 
-use crate::utils::fs as fsutils;
+use crate::{
+    config::Config,
+    language::syntax::SyntaxCounter,
+    stats::Stats,
+    utils::{ext::SliceExt, fs as fsutils},
+};
+
 use self::LanguageType::*;
-use crate::stats::Stats;
-
-use super::syntax::SyntaxCounter;
-use crate::config::Config;
 
 include!(concat!(env!("OUT_DIR"), "/language_type.rs"));
 
@@ -25,26 +30,31 @@ impl LanguageType {
                 Ok(f) => f,
                 Err(e) => return Err((e, path)),
             };
-            let mut s = String::new();
-            let mut reader = DecodeReaderBytes::new(f);
+            let mut s = Vec::new();
+            let mut reader = DecodeReaderBytesBuilder::new().build(f);
 
-            if let Err(e) = reader.read_to_string(&mut s) {
+            if let Err(e) = reader.read_to_end(&mut s) {
                 return Err((e, path));
             }
             s
         };
 
-        Ok(self.parse_from_str(path, &text, config))
+        Ok(self.parse_from_slice(path, &text, config))
+    }
+
+    /// Parses the text provided. Returns `Stats` on success.
+    pub fn parse_from_str<A: AsRef<str>>(self, path: PathBuf, text: A, config: &Config) -> Stats {
+        self.parse_from_slice(path, text.as_ref().as_bytes(), config)
     }
 
     /// Parses the text provided. Returning `Stats` on success.
-    pub fn parse_from_str(self,
-                          path: PathBuf,
-                          text: &str,
-                          config: &Config)
-        -> Stats
-    {
-        let lines = text.lines();
+    pub fn parse_from_slice<A: AsRef<[u8]>>(
+        self,
+        path: PathBuf,
+        text: A,
+        config: &Config,
+    ) -> Stats {
+        let lines = LineIter::new(b'\n', text.as_ref());
         let mut stats = Stats::new(path);
 
         if self.is_blank() {
@@ -61,19 +71,20 @@ impl LanguageType {
     /// line comments or quotes. Returns `bool` indicating whether it was
     /// successful or not.
     #[inline]
-    fn parse_basic(self, syntax: &SyntaxCounter, line: &str, stats: &mut Stats)
-        -> bool
-    {
-        if syntax.quote.is_some() ||
-           !syntax.stack.is_empty() ||
-           syntax.important_syntax().any(|s| line.contains(s))
+    fn parse_basic(self, syntax: &SyntaxCounter, line: &[u8], stats: &mut Stats) -> bool {
+        if syntax.quote.is_some()
+            || !syntax.stack.is_empty()
+            || syntax
+                .important_syntax()
+                .any(|s| line.contains_slice(s.as_bytes()))
         {
             return false;
         }
 
-        if syntax.line_comments.into_iter()
-                               .any(|s| line.as_bytes()
-                                            .starts_with(s.as_bytes()))
+        if syntax
+            .line_comments
+            .iter()
+            .any(|s| line.starts_with(s.as_bytes()))
         {
             stats.comments += 1;
             trace!("Comment No.{}", stats.comments);
@@ -82,24 +93,23 @@ impl LanguageType {
             trace!("Code No.{}", stats.code);
         }
 
-        trace!("{}", line);
+        trace!("{}", String::from_utf8_lossy(line));
         trace!("^ Skippable.");
 
         true
     }
 
     #[inline]
-    fn parse_lines<'a>(self,
-                       config: &Config,
-                       lines: impl IntoIterator<Item=&'a str>,
-                       mut stats: Stats)
-        -> Stats
-    {
+    fn parse_lines<'a>(
+        self,
+        config: &Config,
+        lines: impl IntoIterator<Item = &'a [u8]>,
+        mut stats: Stats,
+    ) -> Stats {
         let mut syntax = SyntaxCounter::new(self);
 
         for line in lines {
-
-            if line.chars().all(char::is_whitespace) {
+            if line.trim().is_empty() {
                 stats.blanks += 1;
                 trace!("Blank No.{}", stats.blanks);
                 continue;
@@ -115,7 +125,7 @@ impl LanguageType {
             macro_rules! skip {
                 ($skip:expr) => {{
                     skip = $skip - 1;
-                }}
+                }};
             }
 
             if self.parse_basic(&syntax, line, &mut stats) {
@@ -129,20 +139,22 @@ impl LanguageType {
                 }
 
                 ended_with_comments = false;
-                let line = line.as_bytes();
                 let window = &line[i..];
 
-                let is_end_of_quote_or_multi_line =
-                    syntax.parse_end_of_quote(window)
+                let is_end_of_quote_or_multi_line = syntax
+                    .parse_end_of_quote(window)
                     .or_else(|| syntax.parse_end_of_multi_line(window));
 
                 if let Some(skip_amount) = is_end_of_quote_or_multi_line {
                     ended_with_comments = true;
                     skip!(skip_amount);
                     continue;
+                } else if syntax.quote.is_some() {
+                    continue;
                 }
 
-                let is_quote_or_multi_line = syntax.parse_quote(window)
+                let is_quote_or_multi_line = syntax
+                    .parse_quote(window)
                     .or_else(|| syntax.parse_multi_line_comment(window));
 
                 if let Some(skip_amount) = is_quote_or_multi_line {
@@ -154,37 +166,29 @@ impl LanguageType {
                     ended_with_comments = true;
                     break 'window;
                 }
-
             }
 
-            trace!("{}", line);
+            trace!("{}", String::from_utf8_lossy(line));
 
-            let is_comments =
-                (
-                    (!syntax.stack.is_empty() || ended_with_comments) &&
-                     had_multi_line
-                ) ||
-                (
+            let is_comments = ((!syntax.stack.is_empty() || ended_with_comments) && had_multi_line)
+                || (
                     // If we're currently in a comment or we just ended
                     // with one.
-                    syntax.start_of_comments().any(|comment| {
-                        line.starts_with(comment)
-                    }) &&
-                    syntax.quote.is_none()
-                ) ||
-                (
-                    (
+                    syntax
+                        .start_of_comments()
+                        .any(|comment| line.starts_with(comment.as_bytes()))
+                        && syntax.quote.is_none()
+                )
+                || ((
                         // If we're currently in a doc string or we just ended
                         // with one.
                         syntax.quote.is_some() ||
-                        syntax.doc_quotes.iter().any(|(s, _)| line.starts_with(s))
+                        syntax.doc_quotes.iter().any(|(s, _)| line.starts_with(s.as_bytes()))
                     ) &&
                     // `Some(true)` is import in order to respect the current
                     // configuration.
                     config.treat_doc_strings_as_comments == Some(true) &&
-                    syntax.quote_is_doc_quote
-                );
-
+                    syntax.quote_is_doc_quote);
 
             if is_comments {
                 stats.comments += 1;
@@ -201,3 +205,12 @@ impl LanguageType {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rust_allows_nested() {
+        assert!(LanguageType::Rust.allows_nested());
+    }
+}

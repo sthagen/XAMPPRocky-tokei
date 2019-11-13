@@ -178,7 +178,7 @@ impl LanguageType {
 
     /// Provides every variant in a Vec
     pub fn list() -> &'static [Self] {
-        return &[
+        &[
             {{#each languages}}
                 {{@key}},
             {{~/each}}
@@ -498,12 +498,3 @@ pub fn get_filetype_from_shebang(file: &Path) -> Option<&'static str>
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn rust() {
-        assert_eq!(LanguageType::Rust.allows_nested(), true);
-    }
-}

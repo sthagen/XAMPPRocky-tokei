@@ -1,26 +1,29 @@
+#[macro_use]
+extern crate log;
+
 mod cli;
 mod cli_utils;
 mod input;
 
-use std::{error::Error, process, io::{self, Write}};
+use std::{
+    error::Error,
+    io::{self, Write},
+    process,
+};
 
-use crate::cli::Cli;
-use crate::cli_utils::*;
-use crate::input::*;
-use tokei::{Language, Languages, Sort, Config};
+use tokei::{Config, Language, Languages, Sort};
 
-fn main() -> Result<(), Box<Error>> {
+use crate::{cli::Cli, cli_utils::*, input::*};
+
+fn main() -> Result<(), Box<dyn Error>> {
     let mut cli = Cli::from_args();
-    let mut config = Config::from_config_files();
-
-    config.types = ::std::mem::replace(&mut cli.types, None).or(config.types);
 
     if cli.print_languages {
         Cli::print_supported_languages();
         process::exit(0);
     }
 
-    setup_logger(cli.verbose);
+    let config = cli.override_config(Config::from_config_files());
     let mut languages = Languages::new();
 
     if let Some(input) = cli.file_input() {
@@ -48,16 +51,18 @@ fn main() -> Result<(), Box<Error>> {
         process::exit(0);
     }
 
-    let columns = cli.columns.or(config.columns).unwrap_or_else(|| {
-        if cli.files {
-            term_size::dimensions().map_or(FALLBACK_ROW_LEN, |(w, _)| {
-                w.max(FALLBACK_ROW_LEN)
-            })
-        } else {
-            FALLBACK_ROW_LEN
-        }
-    });
-
+    let columns = cli
+        .columns
+        .or(config.columns)
+        .or_else(|| {
+            if cli.files {
+                term_size::dimensions().map(|(w, _)| w)
+            } else {
+                None
+            }
+        })
+        .unwrap_or(FALLBACK_ROW_LEN)
+        .max(FALLBACK_ROW_LEN);
 
     let row = "-".repeat(columns);
 
@@ -85,7 +90,7 @@ fn main() -> Result<(), Box<Error>> {
         }
 
         print_results(&mut stdout, &row, languages.into_iter(), cli.files)?
-    } else  {
+    } else {
         print_results(&mut stdout, &row, languages.iter(), cli.files)?
     }
 

@@ -1,18 +1,18 @@
-pub mod languages;
 pub mod language_type;
+pub mod languages;
 mod syntax;
 
-use std::mem;
-use std::ops::AddAssign;
+use std::{mem, ops::AddAssign};
 
-pub use self::languages::Languages;
-pub use self::language_type::*;
+pub use self::{language_type::*, languages::Languages};
 
-use crate::sort::Sort::{self, *};
-use crate::stats::Stats;
+use crate::{
+    sort::Sort::{self, *},
+    stats::Stats,
+};
 
 /// A struct representing statistics about a single Language.
-#[derive(Clone, Debug, Deserialize, Default, Serialize)]
+#[derive(Clone, Debug, Deserialize, Default, PartialEq, Serialize)]
 pub struct Language {
     /// The total number of blank lines.
     pub blanks: usize,
@@ -116,10 +116,7 @@ impl Language {
     /// assert!(rust.is_empty());
     /// ```
     pub fn is_empty(&self) -> bool {
-        self.code == 0 &&
-        self.comments == 0 &&
-        self.blanks == 0 &&
-        self.lines == 0
+        self.code == 0 && self.comments == 0 && self.blanks == 0 && self.lines == 0
     }
 
     /// Sorts each of the `Stats` structs contained in the language based
@@ -162,7 +159,6 @@ impl Language {
             Lines => self.stats.sort_by(|a, b| b.lines.cmp(&a.lines)),
         }
     }
-
 }
 
 impl AddAssign for Language {
@@ -175,4 +171,3 @@ impl AddAssign for Language {
         self.inaccurate |= rhs.inaccurate
     }
 }
-

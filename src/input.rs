@@ -1,9 +1,6 @@
-use std::str::FromStr;
-use std::error::Error;
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, error::Error, str::FromStr};
 
-use tokei::Languages;
-use tokei::{LanguageType, Language};
+use tokei::{Language, LanguageType, Languages};
 
 type LanguageMap = BTreeMap<LanguageType, Language>;
 
@@ -81,7 +78,7 @@ macro_rules! supported_formats {
                 None
             }
 
-            pub fn print(&self, _languages: Languages) -> Result<String, Box<Error>> {
+            pub fn print(&self, _languages: Languages) -> Result<String, Box<dyn Error>> {
                 match *self {
                     $(
                         #[cfg(feature = $feature)] Format::$variant => {
@@ -131,7 +128,7 @@ supported_formats!(
     (cbor, "cbor", Cbor [serde_cbor, hex]) =>
         |input| {
             hex::FromHex::from_hex(input)
-                .map_err(|e: hex::FromHexError| <Box<Error>>::from(e))
+                .map_err(|e: hex::FromHexError| <Box<dyn Error>>::from(e))
                 .and_then(|hex: Vec<_>| Ok(serde_cbor::from_slice(&hex)?))
         },
         |languages| serde_cbor::to_vec(&languages).map(hex::encode),

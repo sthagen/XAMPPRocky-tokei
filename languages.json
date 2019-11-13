@@ -1,72 +1,88 @@
 {
-    "languages":{
-        "Abap":{
-            "name":"ABAP",
-            "line_comment":[
+    "languages": {
+        "Abap": {
+            "name": "ABAP",
+            "line_comment": [
                 "*",
                 "\\\""
             ],
-            "extensions":[
+            "extensions": [
                 "abap"
             ]
         },
-        "ActionScript":{
-            "base":"c",
-            "extensions":[
+        "ActionScript": {
+            "base": "c",
+            "extensions": [
                 "as"
             ]
         },
-        "Ada":{
-            "line_comment":[
+        "Ada": {
+            "line_comment": [
                 "--"
             ],
-            "extensions":[
+            "extensions": [
                 "ada",
                 "adb",
                 "ads",
                 "pad"
             ]
         },
-        "Alex":{
-            "extensions":[
+        "Alex": {
+            "extensions": [
                 "x"
             ]
         },
-        "Agda":{
+        "Agda": {
             "base": "haskell",
-            "extensions":[
+            "extensions": [
                 "agda"
             ]
         },
-        "Assembly":{
-            "line_comment":[
-                ";"
+        "Asn1": {
+            "name": "ASN.1",
+            "line_comment": [
+                "--"
             ],
-            "quotes":[
+            "quotes": [
                 ["\\\"", "\\\""],
                 ["'", "'"]
             ],
-            "extensions":[
+            "multi_line": [
+                ["/*", "*/"]
+            ],
+            "extensions": [
+                "asn1"
+            ]
+        },
+        "Assembly": {
+            "line_comment": [
+                ";"
+            ],
+            "quotes": [
+                ["\\\"", "\\\""],
+                ["'", "'"]
+            ],
+            "extensions": [
                 "s",
                 "asm"
             ]
         },
-        "Asp":{
-            "name":"ASP",
-            "line_comment":[
+        "Asp": {
+            "name": "ASP",
+            "line_comment": [
                 "'",
                 "REM"
             ],
-            "extensions":[
+            "extensions": [
                 "asa",
                 "asp"
             ]
         },
-        "AspNet":{
-            "name":"ASP.NET",
-            "multi_line":[
-                ["<!--", "-->"],
-                ["<%--", "-->"]
+        "AspNet": {
+            "name": "ASP.NET",
+            "multi_line": [
+                    ["<!--", "-->"],
+                    ["<%--", "-->"]
             ],
             "extensions":[
                 "asax",
@@ -294,7 +310,8 @@
                 ["'", "'"]
             ],
             "extensions":[
-                "coffee"
+                "coffee",
+                "cjsx"
             ]
         },
         "Cogent":{
@@ -338,7 +355,8 @@
                 "cpp",
                 "cxx",
                 "c++",
-                "pcc"
+                "pcc",
+                "tpp"
             ]
         },
         "CppHeader":{
@@ -508,6 +526,23 @@
                 "ede"
             ]
         },
+        "Emojicode":{
+            "line_comment":[
+                "💭"
+            ],
+            "multi_line":[
+                ["💭🔜", "🔚💭"],
+                ["📗", "📗"],
+                ["📘", "📘"]
+            ],
+            "quotes":[
+                ["❌🔤", "❌🔤"]
+            ],
+            "extensions":[
+                "emojic",
+                "🍇"
+            ]
+        },
         "Erlang":{
             "line_comment":[
                 "%"
@@ -522,6 +557,13 @@
             "blank": true,
             "extensions":[
                 "fen"
+            ]
+        },
+        "FlatBuffers":{
+            "name":"FlatBuffers Schema",
+            "base":"c",
+            "extensions":[
+                "fbs"
             ]
         },
         "Fstar":{
@@ -636,6 +678,20 @@
                 "go"
             ]
         },
+        "Graphql":{
+            "name":"GraphQL",
+            "quotes":[
+                ["\\\"", "\\\""],
+                ["\\\"\\\"\\\"", "\\\"\\\"\\\""]
+            ],
+            "line_comment":[
+                "#"
+            ],
+            "extensions":[
+                "gql",
+                "graphql"
+            ]
+        },
         "Groovy":{
             "base":"c",
             "extensions":[
@@ -693,6 +749,13 @@
             "base": "c",
             "extensions":[
                 "hlsl"
+            ]
+        },
+        "HolyC":{
+            "base":"c",
+            "extensions":[
+                "HC",
+                "hc"
             ]
         },
         "Html":{
@@ -935,6 +998,18 @@
                 "lsp"
             ]
         },
+        "LLVM": {
+            "line_comment": [
+                ";"
+            ],
+            "quotes":[
+                ["\\\"", "\\\""],
+                ["'", "'"]
+            ],
+            "extensions": [
+                "ll"
+            ]
+        },
         "Logtalk":{
             "base":"pro",
             "extensions":[
@@ -1001,6 +1076,18 @@
             "extensions": ["def"],
             "line_comment": [";"]
         },
+        "MoonScript":{
+            "line_comment":[
+                "--"
+            ],
+            "quotes":[
+                ["\\\"", "\\\""],
+                ["'", "'"]
+            ],
+            "extensions":[
+                "moon"
+            ]
+        },
         "Meson":{
             "line_comment":[
                 "#"
@@ -1052,14 +1139,14 @@
             ]
         },
         "ObjectiveC":{
-            "name":"Objective C",
+            "name":"Objective-C",
             "base":"c",
             "extensions":[
                 "m"
             ]
         },
         "ObjectiveCpp":{
-            "name":"Objective C++",
+            "name":"Objective-C++",
             "base":"c",
             "extensions":[
                 "mm"
@@ -1072,6 +1159,21 @@
                 "mli",
                 "re",
                 "rei"
+            ]
+        },
+        "Odin":{
+            "extensions":[
+                "odin"
+            ],
+            "line_comment":[
+                "//"
+            ],
+            "multi_line":[
+                ["/*", "*/"]
+            ],
+            "quotes":[
+                ["\\\"", "\\\""],
+                ["'", "'"]
             ]
         },
         "Org":{
@@ -1089,17 +1191,20 @@
             ]
         },
         "Pascal":{
+            "nested":true,
+            "line_comment":[
+                "//"
+            ],
             "multi_line":[
                 ["{", "}"],
-                ["(*", "*)"],
-                ["{", "*)"],
-                ["(*", "}"]
+                ["(*", "*)"]
             ],
             "quotes":[
                 ["'", "'"]
             ],
             "extensions":[
-                "pas"
+                "pas",
+                "pp"
             ]
         },
         "Perl":{
@@ -1132,6 +1237,18 @@
             "extensions":[
                 "pl6",
                 "pm6"
+            ]
+        },
+        "Pest": {
+            "line_comment":[
+                "//"
+            ],
+            "quotes":[
+                ["\\\"", "\\\""],
+                ["'", "'"]
+            ],
+            "extensions":[
+                "pest"
             ]
         },
         "NotQuitePerl":{
@@ -1173,6 +1290,27 @@
                 "polly"
             ]
         },
+        "Pony":{
+            "base":"c",
+            "doc_quotes": [
+                ["\\\"\\\"\\\"", "\\\"\\\"\\\""]
+            ],
+            "extensions":[
+                "pony"
+            ]
+        },
+        "PostCss":{
+            "name":"PostCSS",
+            "base":"c",
+            "quotes":[
+                ["\\\"", "\\\""],
+                ["'", "'"]
+            ],
+            "extensions":[
+                "pcss",
+                "sss"
+            ]
+        },
         "Processing":{
             "base":"c",
             "extensions":[
@@ -1184,6 +1322,29 @@
             "extensions":[
                 "p",
                 "pro"
+            ]
+        },
+        "PowerShell":{
+            "line_comment":[
+                "#"
+            ],
+            "multi_line":[
+                ["<#", "#>"]
+            ],
+            "quotes":[
+                ["\\\"", "\\\""],
+                ["'", "'"],
+                ["\\\"@", "@\\\""],
+                ["@'", "'@"]
+            ],
+            "extensions":[
+                "ps1",
+                "psm1",
+                "psd1",
+                "ps1xml",
+                "cdxml",
+                "pssc",
+                "psc1"
             ]
         },
         "PSL":{
@@ -1290,6 +1451,21 @@
                 "cshtml"
             ]
         },
+        "RON":{
+            "name":"Rusty Object Notation",
+            "base":"c",
+            "nested":true,
+            "extensions":[
+                "ron"
+            ]
+        },
+        "RPMSpecfile":{
+            "name":"RPM Specfile",
+            "base":"hash",
+            "extensions":[
+                "spec"
+            ]
+        },
         "Ruby":{
             "line_comment":[
                 "#"
@@ -1300,6 +1476,9 @@
             "quotes":[
                 ["\\\"", "\\\""],
                 ["'", "'"]
+            ],
+            "env":[
+                "ruby"
             ],
             "extensions":[
                 "rb"
@@ -1385,6 +1564,13 @@
                 "sml"
             ]
         },
+        "Solidity":{
+            "name":"Solidity",
+            "base":"c",
+            "extensions":[
+                "sol"
+            ]
+        },
         "SpecmanE":{
             "name":"Specman e",
             "line_comment":[
@@ -1429,6 +1615,19 @@
             ],
             "extensions":[
                 "srt"
+            ]
+        },
+        "Stratego":{
+            "name":"Stratego/XT",
+            "base":"c",
+            "quotes":[
+              ["\\\"", "\\\""],
+              ["$[", "]"],
+              ["$<", ">" ],
+              [ "${", "}" ]
+            ],
+            "extensions":[
+                "str"
             ]
         },
         "Svg":{
@@ -1488,6 +1687,22 @@
             "extensions":[
                 "text",
                 "txt"
+            ]
+        },
+        "Thrift":{
+            "line_comment":[
+                "#",
+                "//"
+            ],
+            "multi_line":[
+                ["/*", "*/"]
+            ],
+            "quotes":[
+                ["\\\"", "\\\""],
+                ["'", "'"]
+            ],
+            "extensions":[
+                "thrift"
             ]
         },
         "Toml":{
@@ -1693,6 +1908,19 @@
                 "vue"
             ]
         },
+        "WebAssembly": {
+            "line_comment":[
+                ";;"
+            ],
+            "quites": [
+                ["\\\"", "\\\""],
+                ["'", "'"]
+            ],
+            "extensions": [
+                "wat",
+                "wast"
+            ]
+        },
         "Wolfram":{
             "base":"func",
             "extensions":[
@@ -1708,7 +1936,7 @@
             ]
         },
         "XcodeConfig":{
-            "name":"XCode Config",
+            "name":"Xcode Config",
             "line_comment": [
                 "//"
             ],
