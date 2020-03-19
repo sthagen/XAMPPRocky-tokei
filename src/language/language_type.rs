@@ -5,10 +5,8 @@ use std::{
     io::{self, BufRead, BufReader, Read},
     path::{Path, PathBuf},
     str::FromStr,
+    sync::Arc,
 };
-
-use encoding_rs_io::DecodeReaderBytesBuilder;
-use grep_searcher::LineIter;
 
 use crate::{
     config::Config,
@@ -17,6 +15,10 @@ use crate::{
     utils::{ext::SliceExt, fs as fsutils},
 };
 
+use aho_corasick::AhoCorasick;
+use encoding_rs_io::DecodeReaderBytesBuilder;
+use grep_searcher::LineIter;
+
 use self::LanguageType::*;
 
 include!(concat!(env!("OUT_DIR"), "/language_type.rs"));
@@ -24,7 +26,12 @@ include!(concat!(env!("OUT_DIR"), "/language_type.rs"));
 impl LanguageType {
     /// Parses a given `Path` using the `LanguageType`. Returning `Stats`
     /// on success and giving back ownership of PathBuf on error.
-    pub fn parse(self, path: PathBuf, config: &Config) -> Result<Stats, (io::Error, PathBuf)> {
+    pub fn parse(
+        self,
+        path: PathBuf,
+        config: &Config,
+        matchers: Arc<(AhoCorasick, AhoCorasick)>,
+    ) -> Result<Stats, (io::Error, PathBuf)> {
         let text = {
             let f = match File::open(&path) {
                 Ok(f) => f,
@@ -39,12 +46,18 @@ impl LanguageType {
             s
         };
 
-        Ok(self.parse_from_slice(path, &text, config))
+        Ok(self.parse_from_slice(path, &text, config, matchers))
     }
 
     /// Parses the text provided. Returns `Stats` on success.
-    pub fn parse_from_str<A: AsRef<str>>(self, path: PathBuf, text: A, config: &Config) -> Stats {
-        self.parse_from_slice(path, text.as_ref().as_bytes(), config)
+    pub fn parse_from_str<A: AsRef<str>>(
+        self,
+        path: PathBuf,
+        text: A,
+        config: &Config,
+        matchers: Arc<(AhoCorasick, AhoCorasick)>,
+    ) -> Stats {
+        self.parse_from_slice(path, text.as_ref().as_bytes(), config, matchers)
     }
 
     /// Parses the text provided. Returning `Stats` on success.
@@ -53,6 +66,7 @@ impl LanguageType {
         path: PathBuf,
         text: A,
         config: &Config,
+        matchers: Arc<(AhoCorasick, AhoCorasick)>,
     ) -> Stats {
         let lines = LineIter::new(b'\n', text.as_ref());
         let mut stats = Stats::new(path);
@@ -63,40 +77,15 @@ impl LanguageType {
             stats.code = count;
             stats
         } else {
-            self.parse_lines(config, lines, stats)
+            self.parse_lines(config, lines, stats, matchers)
         }
     }
 
-    /// Attempts to parse the line as simply as possible if there are no multi
-    /// line comments or quotes. Returns `bool` indicating whether it was
-    /// successful or not.
-    #[inline]
-    fn parse_basic(self, syntax: &SyntaxCounter, line: &[u8], stats: &mut Stats) -> bool {
-        if syntax.quote.is_some()
-            || !syntax.stack.is_empty()
-            || syntax
-                .important_syntax()
-                .any(|s| line.contains_slice(s.as_bytes()))
-        {
-            return false;
-        }
-
-        if syntax
-            .line_comments
-            .iter()
-            .any(|s| line.starts_with(s.as_bytes()))
-        {
-            stats.comments += 1;
-            trace!("Comment No.{}", stats.comments);
-        } else {
-            stats.code += 1;
-            trace!("Code No.{}", stats.code);
-        }
-
-        trace!("{}", String::from_utf8_lossy(line));
-        trace!("^ Skippable.");
-
-        true
+    pub(crate) fn create_matchers(self) -> (AhoCorasick, AhoCorasick) {
+        (
+            aho_corasick::AhoCorasick::new_auto_configured(self.important_syntax()),
+            aho_corasick::AhoCorasick::new_auto_configured(self.line_comments()),
+        )
     }
 
     #[inline]
@@ -105,20 +94,40 @@ impl LanguageType {
         config: &Config,
         lines: impl IntoIterator<Item = &'a [u8]>,
         mut stats: Stats,
+        matchers: Arc<(AhoCorasick, AhoCorasick)>,
     ) -> Stats {
         let mut syntax = SyntaxCounter::new(self);
+        let (ref matcher, ref single_comment) = *matchers;
 
         for line in lines {
-            if line.trim().is_empty() {
-                stats.blanks += 1;
-                trace!("Blank No.{}", stats.blanks);
-                continue;
-            }
-
             // FORTRAN has a rule where it only counts as a comment if it's the
             // first character in the column, so removing starting whitespace
             // could cause a miscount.
             let line = if syntax.is_fortran { line } else { line.trim() };
+            trace!("{}", String::from_utf8_lossy(line));
+
+            if line.trim().is_empty() {
+                stats.blanks += 1;
+                trace!("Blank No.{}", stats.blanks);
+                continue;
+            } else if syntax.is_plain_mode() && !matcher.is_match(line) {
+                trace!("^ Skippable");
+
+                if single_comment
+                    .earliest_find(line)
+                    .map(|m| m.start() == 0)
+                    .unwrap_or(false)
+                {
+                    stats.comments += 1;
+                    trace!("Comment No.{}", stats.comments);
+                } else {
+                    stats.code += 1;
+                    trace!("Code No.{}", stats.code);
+                }
+
+                continue;
+            }
+
             let had_multi_line = !syntax.stack.is_empty();
             let mut ended_with_comments = false;
             let mut skip = 0;
@@ -126,10 +135,6 @@ impl LanguageType {
                 ($skip:expr) => {{
                     skip = $skip - 1;
                 }};
-            }
-
-            if self.parse_basic(&syntax, line, &mut stats) {
-                continue;
             }
 
             'window: for i in 0..line.len() {
