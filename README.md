@@ -5,7 +5,7 @@
 [![Lines Of Code](https://tokei.rs/b1/github/XAMPPRocky/tokei?category=code)](https://github.com/XAMPPRocky/tokei)
 [![Documentation](https://docs.rs/tokei/badge.svg)](https://docs.rs/tokei/)
 
-Tokei is a program that displays statistics about your code. Tokei will show number of files, total lines within those files and code, comments, and blanks grouped by language.
+Tokei is a program that displays statistics about your code. Tokei will show the number of files, total lines within those files and code, comments, and blanks grouped by language.
 
 ### Translations
 - [中文](https://github.com/chinanf-boy/tokei-zh#支持的语言)
@@ -73,7 +73,7 @@ Tokei is a program that displays statistics about your code. Tokei will show num
 # Arch Linux
 pacman -S tokei
 # Cargo
-cargo install tokei 
+cargo install tokei
 # Conda
 conda install -c conda-forge tokei
 # Fedora
@@ -266,96 +266,103 @@ request. Languages are defined in [`languages.json`](./languages.json), and you 
 read how to add and test your language in our [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ```
-ABAP
+Abap
 ActionScript
 Ada
 Agda
 Alex
-ASP
-ASP.NET
+Asn1
+Asp
+AspNet
 Assembly
 AssemblyGAS
-AutoHotKey
 Autoconf
+AutoHotKey
 Automake
-BASH
+Bash
 Batch
 BrightScript
 C
-C Header
-CMake
-C#
-C Shell
 Cabal
 Cassius
 Ceylon
+CHeader
 Clojure
 ClojureC
 ClojureScript
-COBOL
+CMake
+Cobol
 CoffeeScript
 Cogent
 ColdFusion
-ColdFusion CFScript
+ColdFusionScript
 Coq
-C++
-C++ Header
+Cpp
+CppHeader
 Crystal
-CSS
+CSharp
+CShell
+Css
 D
 Dart
-Device Tree
+DeviceTree
 Dockerfile
-.NET Resource
-Dream Maker
+DotNetResource
+DreamMaker
+Dust
 Edn
-Emacs Lisp
+Elisp
 Elixir
 Elm
 Elvish
-Emacs Dev Env
+EmacsDevEnv
+Emojicode
 Erlang
 FEN
-F#
 Fish
+FlatBuffers
 Forth
-FORTRAN Legacy
-FORTRAN Modern
-F*
-GDB Script
-GDScript
-Gherkin (Cucumber)
-GLSL
+FortranLegacy
+FortranModern
+FreeMarker
+FSharp
+Fstar
+GDB
+GdScript
+Gherkin
+Glsl
 Go
+Graphql
 Groovy
 Hamlet
 Handlebars
 Happy
 Haskell
 Haxe
-HCL
-HEX
-HLSL
+Hcl
+Hex
+Hlsl
 HolyC
-HTML
+Html
 Idris
-INI
-Intel HEX
+Ini
+IntelHex
 Isabelle
-JAI
+Jai
 Java
 JavaScript
-JSON
-JSX
+Json
+Jsx
 Julia
 Julius
-Kakoune script
+KakouneScript
 Kotlin
 Lean
-LESS
-LD Script
+Less
+LinkerScript
 Liquid
 Lisp
+LLVM
 Logtalk
 Lua
 Lucius
@@ -364,85 +371,98 @@ Makefile
 Markdown
 Meson
 Mint
-Module-Definition
-MSBuild
+ModuleDef
+MoonScript
+MsBuild
 Mustache
 Nim
 Nix
-Not Quite Perl
+NotQuitePerl
+ObjectiveC
+ObjectiveCpp
 OCaml
-Objective-C
-Objective-C++
+Odin
 Org
 Oz
-PSL Assertion
 Pascal
 Perl
 Perl6
-PHP
+Pest
+Php
 Polly
+Pony
+PostCss
+PowerShell
 Processing
 Prolog
-Protocol Buffers
+Protobuf
+PSL
 PureScript
 Python
-QCL
-QML
+Qcl
+Qml
 R
 Racket
 Rakefile
 Razor
+Renpy
 ReStructuredText
+RON
+RPMSpecfile
 Ruby
-Ruby HTML
+RubyHtml
 Rust
-SRecode Template
 Sass
 Scala
 Scheme
 Scons
-Shell
-Standard ML (SML)
+Sh
+Sml
 Solidity
-Specman e
-Spice Netlist
-SQL
-SVG
+SpecmanE
+Spice
+Sql
+SRecode
+Stratego
+Svg
 Swift
-SWIG
+Swig
 SystemVerilog
-TCL
-TeX
-Plain Text
-TOML
+Tcl
+Tex
+Text
+Thrift
+Toml
 Twig
 TypeScript
-Unreal Markdown
-Unreal Plugin
-Unreal Project
-Unreal Script
-Unreal Shader
-Unreal Shader Header
-Ur/Web
-Ur/Web Project
+UnrealDeveloperMarkdown
+UnrealPlugin
+UnrealProject
+UnrealScript
+UnrealShader
+UnrealShaderHeader
+UrWeb
+UrWebProject
+Vala
 VB6
 VBScript
-Vala
+Velocity
 Verilog
-Verilog Args File
-VHDL
-Vim Script
-Visual Basic
-Visual Studio Project
-Visual Studio Solution
+VerilogArgsFile
+Vhdl
+VimScript
+VisualBasic
+VisualStudioProject
+VisualStudioSolution
 Vue
+WebAssembly
 Wolfram
+Xaml
+XcodeConfig
+Xml
 XSL
-XAML
-Xcode Config
-XML
 Xtend
-YAML
+Yaml
 Zig
 Zsh
 ```

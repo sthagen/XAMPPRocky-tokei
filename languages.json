@@ -24,6 +24,13 @@
       "multi_line_comments": [["{-", "-}"]],
       "extensions": ["agda"]
     },
+    "Arduino": {
+      "name": "Arduino C++",
+      "line_comment": ["//"],
+      "multi_line_comments": [["/*", "*/"]],
+      "quotes": [["\\\"", "\\\""]],
+      "extensions": ["ino"]
+    },
     "Asn1": {
       "name": "ASN.1",
       "line_comment": ["--"],
@@ -76,6 +83,7 @@
     },
     "Sh": {
       "name": "Shell",
+      "shebangs": ["#!/bin/sh"],
       "line_comment": ["#"],
       "quotes": [["\\\"", "\\\""], ["'", "'"]],
       "env": ["sh"],
@@ -83,6 +91,7 @@
     },
     "Bash": {
       "name": "BASH",
+      "shebangs": ["#!/bin/bash"],
       "line_comment": ["#"],
       "quotes": [["\\\"", "\\\""], ["'", "'"]],
       "env": ["bash"],
@@ -100,6 +109,7 @@
       "extensions": ["elv"]
     },
     "Fish": {
+      "shebangs": ["#!/bin/fish"],
       "line_comment": ["#"],
       "quotes": [["\\\"", "\\\""], ["'", "'"]],
       "env": ["fish"],
@@ -221,6 +231,7 @@
     },
     "CShell": {
       "name": "C Shell",
+      "shebangs": ["#!/bin/csh"],
       "line_comment": ["#"],
       "env": ["csh"],
       "extensions": ["csh"]
@@ -711,6 +722,11 @@
       "multi_line_comments": [["/*", "*/"]],
       "extensions": ["oz"]
     },
+    "Pan": {
+      "line_comment": ["#"],
+      "quotes": [["\\\"", "\\\""], ["'", "'"]],
+      "extensions": ["pan", "tpl"]
+    },
     "Pascal": {
       "nested": true,
       "line_comment": ["//"],
@@ -719,6 +735,7 @@
       "extensions": ["pas", "pp"]
     },
     "Perl": {
+      "shebangs": ["#!/usr/bin/perl"],
       "line_comment": ["#"],
       "multi_line_comments": [["=pod", "=cut"]],
       "quotes": [["\\\"", "\\\""], ["'", "'"]],
@@ -852,6 +869,12 @@
       "multi_line_comments": [["<!--", "-->"], ["@*", "*@"]],
       "extensions": ["cshtml"]
     },
+    "Renpy": {
+      "name": "Ren'Py",
+      "line_comment": ["#"],
+      "quotes": [["\\\"", "\\\""], ["'", "'"], ["`", "`"]],
+      "extensions": ["rpy"]
+    },
     "RON": {
       "name": "Rusty Object Notation",
       "line_comment": ["//"],
@@ -883,7 +906,7 @@
       "multi_line_comments": [["/*", "*/"]],
       "nested": true,
       "extensions": ["rs"],
-      "quotes": [["\\\"", "\\\""], ["r#\\\"", "\\\"#"], ["#\\\"", "\\\"#"]]
+      "quotes": [["\\\"", "\\\""], ["r#\\\"", "\\\"#"], ["#\\\"", "\\\"#"], ["'", "'"]]
     },
     "ReStructuredText": {
       "blank": true,
@@ -1206,6 +1229,7 @@
       "extensions": ["zig"]
     },
     "Zsh": {
+      "shebangs": ["#!/bin/zsh"],
       "line_comment": ["#"],
       "quotes": [["\\\"", "\\\""], ["'", "'"]],
       "extensions": ["zsh"]
