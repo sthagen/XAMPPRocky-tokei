@@ -392,6 +392,10 @@
       "quotes": [["\\\"", "\\\""]],
       "extensions": ["fs", "fsi", "fsx", "fsscript"]
     },
+    "Futhark": {
+      "line_comment": ["--"],
+      "extensions": ["fut"]
+    },
     "GDB": {
       "name": "GDB Script",
       "line_comment": ["#"],
@@ -425,6 +429,12 @@
       "quotes": [["\\\"", "\\\""]],
       "extensions": ["go"]
     },
+    "Gohtml": {
+      "name": "Go HTML",
+      "multi_line_comments": [["<!--", "-->"], ["{{/*", "*/}}"]],
+      "quotes": [["\\\"", "\\\""], ["'", "'"]],
+      "extensions": ["gohtml"]
+    },
     "Graphql": {
       "name": "GraphQL",
       "quotes": [["\\\"", "\\\""], ["\\\"\\\"\\\"", "\\\"\\\"\\\""]],
@@ -457,6 +467,12 @@
       "multi_line_comments": [["/*", "*/"]],
       "quotes": [["\\\"", "\\\""]],
       "extensions": ["tf", "tfvars"]
+    },
+    "Headache": {
+      "line_comment": ["//"],
+      "multi_line_comments": [["/*", "*/"]],
+      "quotes": [["\\\"", "\\\""]],
+      "extensions": ["ha"]
     },
     "Hlsl": {
       "name": "HLSL",
@@ -712,6 +728,11 @@
       "multi_line_comments": [["/*", "*/"]],
       "quotes": [["\\\"", "\\\""], ["'", "'"]]
     },
+    "OpenType": {
+      "name": "OpenType Feature File",
+      "line_comment": ["#"],
+      "extensions": ["fea"]
+    },
     "Org": {
       "line_comment": ["# "],
       "extensions": ["org"]
@@ -899,7 +920,7 @@
       "name": "Ruby HTML",
       "multi_line_comments": [["<!--", "-->"]],
       "quotes": [["\\\"", "\\\""], ["'", "'"]],
-      "extensions": ["rhtml"]
+      "extensions": ["rhtml", "erb"]
     },
     "Rust": {
       "line_comment": ["//"],
