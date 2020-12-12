@@ -5,13 +5,9 @@ mod cli;
 mod cli_utils;
 mod input;
 
-use std::{
-    error::Error,
-    io::{self, Write},
-    process,
-};
+use std::{error::Error, io, process};
 
-use tokei::{Config, Language, Languages, Sort};
+use tokei::{Config, Languages, Sort};
 
 use crate::{cli::Cli, cli_utils::*, input::*};
 
@@ -58,21 +54,24 @@ fn main() -> Result<(), Box<dyn Error>> {
     languages.get_statistics(&input, &cli.ignored_directories(), &config);
 
     if let Some(format) = cli.output {
-        print!("{}", format.print(languages).unwrap());
+        print!("{}", format.print(&languages).unwrap());
         process::exit(0);
     }
 
-    let row = "-".repeat(columns);
-
-    let mut stdout = io::BufWriter::new(io::stdout());
+    let mut printer = Printer::new(
+        columns,
+        cli.files,
+        io::BufWriter::new(io::stdout()),
+        cli.number_format,
+    );
 
     if languages.iter().any(|(_, lang)| lang.inaccurate) {
-        print_inaccuracy_warning(&mut stdout)?;
+        printer.print_inaccuracy_warning()?;
     }
 
-    print_header(&mut stdout, &row, columns)?;
+    printer.print_header()?;
 
-    if let Some(sort_category) = cli.sort {
+    if let Some(sort_category) = cli.sort.or(config.sort) {
         for (_, ref mut language) in &mut languages {
             language.sort_by(sort_category)
         }
@@ -83,29 +82,16 @@ fn main() -> Result<(), Box<dyn Error>> {
             Sort::Blanks => languages.sort_by(|a, b| b.1.blanks.cmp(&a.1.blanks)),
             Sort::Comments => languages.sort_by(|a, b| b.1.comments.cmp(&a.1.comments)),
             Sort::Code => languages.sort_by(|a, b| b.1.code.cmp(&a.1.code)),
-            Sort::Files => languages.sort_by(|a, b| b.1.stats.len().cmp(&a.1.stats.len())),
-            Sort::Lines => languages.sort_by(|a, b| b.1.lines.cmp(&a.1.lines)),
+            Sort::Files => languages.sort_by(|a, b| b.1.reports.len().cmp(&a.1.reports.len())),
+            Sort::Lines => languages.sort_by(|a, b| b.1.lines().cmp(&a.1.lines())),
         }
 
-        print_results(&mut stdout, &row, languages.into_iter(), cli.files)?
+        printer.print_results(languages.into_iter())?
     } else {
-        print_results(&mut stdout, &row, languages.iter(), cli.files)?
+        printer.print_results(languages.iter())?
     }
 
-    // If we're listing files there's already a trailing row so we don't want an
-    // extra one.
-    if !cli.files {
-        writeln!(stdout, "{}", row)?;
-    }
-
-    let mut total = Language::new();
-
-    for (_, language) in languages {
-        total += language;
-    }
-
-    print_language(&mut stdout, columns, &total, "Total")?;
-    writeln!(stdout, "{}", row)?;
+    printer.print_total(languages)?;
 
     Ok(())
 }

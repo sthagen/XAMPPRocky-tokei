@@ -1,4 +1,5 @@
 use std::{collections::BTreeMap, error::Error, str::FromStr};
+use serde_json::{json, Map};
 
 use tokei::{Language, LanguageType, Languages};
 
@@ -21,16 +22,17 @@ macro_rules! supported_formats {
         /// To enable all formats compile with the `all` feature.
         #[derive(Debug)]
         pub enum Format {
+            Json,
             $(
                 #[cfg(feature = $feature)] $variant
             ),+
-
             // TODO: Allow adding format at runtime when used as a lib?
         }
 
         impl Format {
             pub fn supported() -> &'static [&'static str] {
                 &[
+                    "json",
                     $(
                         #[cfg(feature = $feature)] stringify!($name)
                     ),+
@@ -61,6 +63,9 @@ macro_rules! supported_formats {
                 if input.is_empty() {
                     return None
                 }
+                if let Ok(result) = serde_json::from_str(input) {
+                    return Some(result)
+                }
 
                 $(
                     // attributes are not yet allowed on `if` expressions
@@ -78,12 +83,20 @@ macro_rules! supported_formats {
                 None
             }
 
-            pub fn print(&self, _languages: Languages) -> Result<String, Box<dyn Error>> {
+            pub fn print(&self, languages: &Languages) -> Result<String, Box<dyn Error>> {
+                // To serde_json Map and add summary
+                let mut map = Map::new();
+                for (language_type, language) in languages.into_iter() {
+                    map.insert(language_type.to_string(), json!(language));
+                }
+                map.insert(String::from("Total"), json!(languages.total()));
+
                 match *self {
+                    Format::Json => Ok(serde_json::to_string(&map)?),
                     $(
                         #[cfg(feature = $feature)] Format::$variant => {
                             let print= &{ $print_kode };
-                            Ok(print(&_languages)?)
+                            Ok(print(&map)?)
                         }
                     ),+
                 }
@@ -95,6 +108,7 @@ macro_rules! supported_formats {
 
             fn from_str(format: &str) -> Result<Self, Self::Err> {
                 match format {
+                    "json" => Ok(Format::Json),
                     $(
                         stringify!($name) => {
                             #[cfg(feature = $feature)]

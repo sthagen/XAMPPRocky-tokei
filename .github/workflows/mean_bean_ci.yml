@@ -14,9 +14,6 @@ jobs:
   install-cross:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-        with:
-          depth: 50
       - uses: XAMPPRocky/get-github-release@v1
         id: cross
         with:
@@ -24,7 +21,7 @@ jobs:
           repo: cross
           matches: ${{ matrix.platform }}
           token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         with:
           name: cross-${{ matrix.platform }}
           path: ${{ steps.cross.outputs.install_path }}
@@ -41,8 +38,6 @@ jobs:
     needs: install-cross
     steps:
       - uses: actions/checkout@v2
-        with:
-          depth: 50
       - run: ci/set_rust_version.bash ${{ matrix.channel }} ${{ matrix.target }}
         shell: bash
       - run: ci/build.bash cargo ${{ matrix.target }}
@@ -69,10 +64,7 @@ jobs:
     needs: install-cross
     steps:
       - uses: actions/checkout@v2
-        with:
-          depth: 50
-
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact@v2
         with:
           name: cross-apple-darwin
           path: /usr/local/bin/
@@ -101,11 +93,8 @@ jobs:
     needs: install-cross
     steps:
       - uses: actions/checkout@v2
-        with:
-          depth: 50
-
       - name: Download Cross
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v2
         with:
           name: cross-linux-musl
           path: /tmp/
@@ -151,12 +140,10 @@ jobs:
           - mipsel-unknown-linux-gnu
           - mipsel-unknown-linux-musl
           - powerpc-unknown-linux-gnu
-          - powerpc64-unknown-linux-gnu
           - powerpc64le-unknown-linux-gnu
           - s390x-unknown-linux-gnu
           - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
-          - sparc64-unknown-linux-gnu
           # Android
           - aarch64-linux-android
           - arm-linux-androideabi
@@ -169,8 +156,6 @@ jobs:
           # - i686-unknown-freebsd
           # - x86_64-unknown-freebsd
           - x86_64-unknown-netbsd
-          # DragonFly (Doesn't currently work)
-          # - x86_64-unknown-dragonfly
           # Solaris
           - sparcv9-sun-solaris
           - x86_64-sun-solaris

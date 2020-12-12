@@ -1,37 +1,100 @@
-use std::{fmt, path::PathBuf};
+use std::{collections::BTreeMap, fmt, ops, path::PathBuf};
 
-/// A struct representing the statistics of a file.
-#[derive(Deserialize, Serialize, Clone, Debug, PartialEq)]
-pub struct Stats {
-    /// Number of blank lines within the file.
+use crate::LanguageType;
+
+/// A struct representing stats about a single blob of code.
+#[derive(Clone, Debug, Default, PartialEq, serde::Deserialize, serde::Serialize)]
+#[non_exhaustive]
+pub struct CodeStats {
+    /// The blank lines in the blob.
     pub blanks: usize,
-    /// Number of lines of code within the file.
+    /// The lines of code in the blob.
     pub code: usize,
-    /// Number of comments within the file. (_includes both multi line, and
-    /// single line comments_)
+    /// The lines of comments in the blob.
     pub comments: usize,
-    /// Total number of lines within the file.
-    pub lines: usize,
-    /// File name.
-    pub name: PathBuf,
+    /// Language blobs that were contained inside this blob.
+    pub blobs: BTreeMap<LanguageType, CodeStats>,
 }
 
-impl Stats {
-    /// Create a new `Stats` from a [`PathBuf`].
-    ///
-    /// [`PathBuf`]: //doc.rust-lang.org/std/path/struct.PathBuf.html
-    pub fn new(name: PathBuf) -> Self {
-        Stats {
-            blanks: 0,
-            code: 0,
-            comments: 0,
-            lines: 0,
-            name,
+impl CodeStats {
+    /// Creates a new blank `CodeStats`.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Get the total lines in a blob of code.
+    pub fn lines(&self) -> usize {
+        self.blanks + self.code + self.comments
+    }
+
+    /// Creates a new `CodeStats` from an existing one with all of the child
+    /// blobs merged.
+    pub fn summarise(&self) -> Self {
+        let mut summary = self.clone();
+
+        for (_, stats) in std::mem::replace(&mut summary.blobs, BTreeMap::new()) {
+            let child_summary = stats.summarise();
+
+            summary.blanks += child_summary.blanks;
+            summary.comments += child_summary.comments;
+            summary.code += child_summary.code;
+        }
+
+        summary
+    }
+}
+
+impl ops::Add for CodeStats {
+    type Output = Self;
+
+    fn add(mut self, rhs: Self) -> Self::Output {
+        self += rhs;
+        self
+    }
+}
+
+impl ops::AddAssign for CodeStats {
+    fn add_assign(&mut self, rhs: Self) {
+        self.blanks += rhs.blanks;
+        self.code += rhs.code;
+        self.comments += rhs.comments;
+
+        for (language, stats) in rhs.blobs {
+            *self.blobs.entry(language).or_default() += stats;
         }
     }
 }
 
-fn find_char_boundary(s: &str, index: usize) -> usize {
+/// A struct representing the statistics of a file.
+#[derive(Deserialize, Serialize, Clone, Debug, Default, PartialEq)]
+#[non_exhaustive]
+pub struct Report {
+    /// The code statistics found in the file.
+    pub stats: CodeStats,
+    /// File name.
+    pub name: PathBuf,
+}
+
+impl Report {
+    /// Create a new `Report` from a [`PathBuf`].
+    ///
+    /// [`PathBuf`]: //doc.rust-lang.org/std/path/struct.PathBuf.html
+    pub fn new(name: PathBuf) -> Self {
+        Report {
+            name,
+            ..Self::default()
+        }
+    }
+}
+
+impl ops::AddAssign<CodeStats> for Report {
+    fn add_assign(&mut self, rhs: CodeStats) {
+        self.stats += rhs;
+    }
+}
+
+#[doc(hidden)]
+pub fn find_char_boundary(s: &str, index: usize) -> usize {
     for i in 0..4 {
         if s.is_char_boundary(index + i) {
             return index + i;
@@ -46,16 +109,16 @@ macro_rules! display_stats {
             $f,
             " {: <max$} {:>12} {:>12} {:>12} {:>12}",
             $name,
-            $this.lines,
-            $this.code,
-            $this.comments,
-            $this.blanks,
+            $this.stats.lines(),
+            $this.stats.code,
+            $this.stats.comments,
+            $this.stats.blanks,
             max = $max
         )
     };
 }
 
-impl fmt::Display for Stats {
+impl fmt::Display for Report {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let name = self.name.to_string_lossy();
         let name_length = name.len();

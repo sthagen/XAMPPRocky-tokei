@@ -1,6 +1,7 @@
 use std::{env, fs, path::PathBuf};
 
 use crate::language::LanguageType;
+use crate::sort::Sort;
 
 /// A configuration struct for how [`Languages::get_statistics`] searches and
 /// counts languages.
@@ -22,15 +23,23 @@ pub struct Config {
     pub columns: Option<usize>,
     /// Count hidden files and directories. *Default:* `false`.
     pub hidden: Option<bool>,
-    /// Don't respect ignore files. *Default:* `false`.
+    /// Don't respect ignore files (.gitignore, .ignore, etc.). This implies --no-ignore-parent,
+    /// --no-ignore-dot, and --no-ignore-vcs. *Default:* `false`.
     pub no_ignore: Option<bool>,
-    /// Don't respect ignore files in parent directories. *Default:* `false`.
+    /// Don't respect ignore files (.gitignore, .ignore, etc.) in parent directories.
+    /// *Default:* `false`.
     pub no_ignore_parent: Option<bool>,
-    /// Don't respect VCS ignore files. *Default:* `false`.
+    /// Don't respect .ignore and .tokeignore files, including those in parent directories.
+    /// *Default:* `false`.
+    pub no_ignore_dot: Option<bool>,
+    /// Don't respect VCS ignore files (.gitignore, .hgignore, etc.), including those in
+    /// parent directories. *Default:* `false`.
     pub no_ignore_vcs: Option<bool>,
     /// Whether to treat doc strings in languages as comments.  *Default:*
     /// `false`.
     pub treat_doc_strings_as_comments: Option<bool>,
+    /// Sort languages. *Default:* `None`.
+    pub sort: Option<Sort>,
     /// Filters languages searched to just those provided. E.g. A directory
     /// containing `C`, `Cpp`, and `Rust` with a `Config.types` of `[Cpp, Rust]`
     /// will count only `Cpp` and `Rust`. *Default:* `None`.
@@ -40,9 +49,10 @@ pub struct Config {
 }
 
 impl Config {
-    /// Get either `tokei.toml` or `.tokeirc`. `tokei.toml` takes precedence
-    /// over `.tokeirc` as the latter is a hidden file on Unix and not idiomatic
-    /// on Windows.
+    /// Constructs a new `Config` from either `$base/tokei.toml` or
+    /// `$base/.tokeirc`. `tokei.toml` takes precedence over `.tokeirc`
+    /// as the latter is a hidden file on Unix and not an idiomatic
+    /// filename on Windows.
     fn get_config(base: PathBuf) -> Option<Self> {
         fs::read_to_string(base.join("tokei.toml"))
             .ok()
@@ -50,11 +60,12 @@ impl Config {
             .and_then(|s| toml::from_str(&s).ok())
     }
 
-    /// Creates a `Config` from two configuration files if they are available.
+    /// Creates a `Config` from three configuration files if they are available.
     /// Files can have two different names `tokei.toml` and `.tokeirc`.
     /// Firstly it will attempt to find a config in the configuration directory
-    /// (see below), and secondly from the current directory. The current
-    /// directory's configuration will take priority over the configuration
+    /// (see below), secondly from the home directory, `$HOME/`,
+    /// and thirdly from the current directory, `./`.
+    /// The current directory's configuration will take priority over the configuratio
     /// directory.
     ///
     /// |Platform | Value | Example |
@@ -73,7 +84,11 @@ impl Config {
     // /// extensions = ["py3"]
     /// ```
     pub fn from_config_files() -> Self {
-        let conf_dir = ::dirs::config_dir()
+        let conf_dir = dirs::config_dir()
+            .and_then(Self::get_config)
+            .unwrap_or_else(Self::default);
+
+        let home_dir = dirs::home_dir()
             .and_then(Self::get_config)
             .unwrap_or_else(Self::default);
 
@@ -83,15 +98,27 @@ impl Config {
             .unwrap_or_else(Self::default);
 
         Config {
-            columns: current_dir.columns.or(conf_dir.columns),
+            columns: current_dir
+                .columns
+                .or(home_dir.columns.or(conf_dir.columns)),
             //languages: current_dir.languages.or(conf_dir.languages),
-            treat_doc_strings_as_comments: current_dir
+            treat_doc_strings_as_comments: current_dir.treat_doc_strings_as_comments.or(home_dir
                 .treat_doc_strings_as_comments
-                .or(conf_dir.treat_doc_strings_as_comments),
-            types: current_dir.types.or(conf_dir.types),
-            no_ignore: current_dir.no_ignore.or(conf_dir.no_ignore),
-            no_ignore_parent: current_dir.no_ignore_parent.or(conf_dir.no_ignore_parent),
-            no_ignore_vcs: current_dir.no_ignore_vcs.or(conf_dir.no_ignore_vcs),
+                .or(conf_dir.treat_doc_strings_as_comments)),
+            sort: current_dir.sort.or(home_dir.sort.or(conf_dir.sort)),
+            types: current_dir.types.or(home_dir.types.or(conf_dir.types)),
+            no_ignore: current_dir
+                .no_ignore
+                .or(home_dir.no_ignore.or(conf_dir.no_ignore)),
+            no_ignore_parent: current_dir
+                .no_ignore_parent
+                .or(home_dir.no_ignore_parent.or(conf_dir.no_ignore_parent)),
+            no_ignore_dot: current_dir
+                .no_ignore_dot
+                .or(home_dir.no_ignore_dot.or(conf_dir.no_ignore_dot)),
+            no_ignore_vcs: current_dir
+                .no_ignore_vcs
+                .or(home_dir.no_ignore_vcs.or(conf_dir.no_ignore_vcs)),
             ..Self::default()
         }
     }

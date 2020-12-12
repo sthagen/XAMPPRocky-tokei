@@ -12,21 +12,29 @@ Tokei is a program that displays statistics about your code. Tokei will show the
 
 ## Example
 ```console
--------------------------------------------------------------------------------
+===============================================================================
  Language            Files        Lines         Code     Comments       Blanks
--------------------------------------------------------------------------------
+===============================================================================
  BASH                    4           49           30           10            9
- JSON                    1         1214         1214            0            0
- Markdown                4         1236         1236            0            0
- Rust                   19         3049         2224          431          394
+ JSON                    1         1332         1332            0            0
  Shell                   1           49           38            1           10
- TOML                    1           79           68            0           11
+ TOML                    2           77           64            4            9
 -------------------------------------------------------------------------------
- Total                  30         5676         4810          442          424
+ Markdown                5         1355            0         1074          281
+ |- JSON                 1           41           41            0            0
+ |- Rust                 2           53           42            6            5
+ |- Shell                1           22           18            0            4
+ (Total)                           1471          101         1080          290
 -------------------------------------------------------------------------------
+ Rust                   19         3416         2840          116          460
+ |- Markdown            12          351            5          295           51
+ (Total)                           3767         2845          411          511
+===============================================================================
+ Total                  32         6745         4410         1506          829
+===============================================================================
 ```
 
-## [Documentation](https://docs.rs/tokei)
+## [API Documentation](https://docs.rs/tokei)
 
 ## Table of Contents
 
@@ -34,6 +42,7 @@ Tokei is a program that displays statistics about your code. Tokei will show the
 - [Installation](#installation)
     - [Package Managers](#package-managers)
     - [Manual](#manual)
+- [Configuration](#configuration)
 - [How to use Tokei](#how-to-use-tokei)
 - [Options](#options)
 - [Badges](#badges)
@@ -46,7 +55,8 @@ Tokei is a program that displays statistics about your code. Tokei will show the
 
 ## Features
 
-- Tokei is **very fast**, check out our [latest release](https://github.com/XAMPPRocky/tokei/releases/latest)
+- Tokei is **very fast**, and is able to count millions of lines of code in seconds.
+  Check out the [12.0.0 release](https://github.com/XAMPPRocky/tokei/releases/v12.0.0)
   to see how Tokei's speed compares to others.
 
 - Tokei is **accurate**, Tokei correctly handles multi line comments,
@@ -69,6 +79,8 @@ Tokei is a program that displays statistics about your code. Tokei will show the
 ## Installation
 
 ### Package Managers
+
+#### Linux
 ```console
 # Arch Linux
 pacman -S tokei
@@ -80,12 +92,24 @@ conda install -c conda-forge tokei
 sudo dnf install tokei
 # FreeBSD
 pkg install tokei
-# MacOS (Homebrew)
-brew install tokei
 # Nix/NixOS
 nix-env -i tokei
 # OpenSUSE
 sudo zypper install tokei
+```
+
+#### macOS
+```console
+# Homebrew
+brew install tokei
+# MacPorts
+sudo port selfupdate
+sudo port install tokei
+```
+
+#### Windows
+```console
+scoop install tokei
 ```
 
 ### Manual
@@ -100,7 +124,15 @@ You can also build and install from source (requires the latest stable [Rust] co
 cargo install --git https://github.com/XAMPPRocky/tokei.git
 ```
 
-[rust]: https://www-rust-lang.org
+[rust]: https://www.rust-lang.org
+
+
+## Configuration
+
+Tokei has a [configuration] file that allows you to change default behaviour.
+The file can be named `tokei.toml` or `.tokeirc`. Currently tokei looks for
+this file in three different places. The current directory,your home directory,
+and your configuration directory.
 
 ## How to use Tokei
 
@@ -112,6 +144,8 @@ and all subfolders.
 ```shell
 $ tokei ./foo
 ```
+
+[configuration]: ./tokei.example.toml
 
 #### Multiple folders
 To have tokei report on multiple folders in the same call simply add a comma,
@@ -171,15 +205,11 @@ tokei with the features flag.
 
   YAML:
   cargo install tokei --features yaml
-
-  TOML:
-  cargo install tokei --features toml
 ```
 
 **Currently supported formats**
 - JSON `--output json`
 - YAML `--output yaml`
-- TOML `--output toml`
 - CBOR `--output cbor`
 
 ```shell
@@ -206,9 +236,12 @@ FLAGS:
     -h, --help                Prints help information
         --hidden              Count hidden files.
     -l, --languages           Prints out supported languages and their extensions.
-        --no-ignore           Don't respect ignore files.
-        --no-ignore-parent    Don't respect ignore files in parent directories.
-        --no-ignore-vcs       Don't respect VCS ignore files.
+        --no-ignore           Don't respect ignore files (.gitignore, .ignore, etc.). This implies --no-ignore-parent,
+                              --no-ignore-dot, and --no-ignore-vcs.
+        --no-ignore-dot       Don't respect .ignore and .tokeignore files, including those in parent directories.
+        --no-ignore-parent    Don't respect ignore files (.gitignore, .ignore, etc.) in parent directories.
+        --no-ignore-vcs       Don't respect VCS ignore files (.gitignore, .hgignore, etc.), including those in parent
+                              directories.
     -V, --version             Prints version information
     -v, --verbose             Set log output level:
                                           1: to show unknown file extensions,
@@ -217,7 +250,7 @@ FLAGS:
 
 OPTIONS:
     -c, --columns <columns>       Sets a strict column width of the output, only available for terminal output.
-    -e, --exclude <exclude>...    Ignore all files & directories containing the word.
+    -e, --exclude <exclude>...    Ignore all files & directories matching the pattern.
     -i, --input <file_input>      Gives statistics from a previous tokei run. Can be given a file path, or "stdin" to
                                   read from stdin.
     -o, --output <output>         Outputs Tokei in a specific format. Compile with additional features for more format
@@ -226,7 +259,7 @@ OPTIONS:
     -t, --type <types>            Filters output by language type, seperated by a comma. i.e. -t=Rust,Markdown
 
 ARGS:
-    <input>...    The input file(s)/directory(ies) to be counted.
+    <input>...    The path(s) to the file or directory to be counted.
 ```
 
 ## Badges
@@ -271,6 +304,7 @@ ActionScript
 Ada
 Agda
 Alex
+Alloy
 Asn1
 Asp
 AspNet
@@ -304,8 +338,10 @@ CSharp
 CShell
 Css
 D
+DAML
 Dart
 DeviceTree
+Dhall
 Dockerfile
 DotNetResource
 DreamMaker
@@ -330,10 +366,12 @@ Fstar
 GDB
 GdScript
 Gherkin
+Gleam
 Glsl
 Go
 Graphql
 Groovy
+Gwion
 Hamlet
 Handlebars
 Happy
@@ -424,6 +462,7 @@ Spice
 Sql
 SRecode
 Stratego
+Svelte
 Svg
 Swift
 Swig
@@ -433,6 +472,7 @@ Tex
 Text
 Thrift
 Toml
+Tsx
 Twig
 TypeScript
 UnrealDeveloperMarkdown

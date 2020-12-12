@@ -17,9 +17,18 @@ use crate::{
 /// directory.
 /// ([_List of
 /// Languages_](https://github.com/XAMPPRocky/tokei#supported-languages))
-#[derive(Debug, Default, Serialize)]
+#[derive(Debug, Default)]
 pub struct Languages {
     inner: BTreeMap<LanguageType, Language>,
+}
+
+impl serde::Serialize for Languages {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.inner.serialize(serializer)
+    }
 }
 
 impl<'de> serde::Deserialize<'de> for Languages {
@@ -80,12 +89,21 @@ impl Languages {
     /// Constructs a new, Languages struct. Languages is always empty and does
     /// not allocate.
     ///
-    /// ```
+    /// ```rust
     /// # use tokei::*;
     /// let languages = Languages::new();
     /// ```
     pub fn new() -> Self {
         Languages::default()
+    }
+
+    /// Summary of the Languages struct.
+    pub fn total(self: &Languages) -> Language {
+        let mut total = Language::new();
+        for (_, language) in self {
+            total += language.summarise();
+        }
+        total
     }
 }
 

@@ -1,8 +1,17 @@
-// 39 lines 32 code 2 comments 5 blanks
+//! 48 lines 36 code 6 comments 6 blanks
+//! ```rust
+//! fn main () {
+//!     // Comment
+//!
+//!     println!("Hello World!");
+//! }
+//! ```
 
 /* /**/ */
 fn main() {
-    let start = "/*";
+    let start = r##"/*##\"
+\"##;
+    // comment
     loop {
         if x.len() >= 2 && x[0] == '*' && x[1] == '/' { // found the */
             break;
@@ -10,7 +19,7 @@ fn main() {
     }
 }
 
-fn foo() {
+fn foo<'a, 'b>(name: &'b str) {
     let this_ends = "a \"test/*.";
     call1();
     call2();

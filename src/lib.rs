@@ -1,4 +1,4 @@
-//! # Tokei: Easily count code.
+//! # Tokei: Count your code quickly.
 //!
 //! A simple, efficient library for counting code in directories. This
 //! functionality is also provided as a
@@ -58,5 +58,5 @@ pub use self::{
     config::Config,
     language::{Language, LanguageType, Languages},
     sort::Sort,
-    stats::Stats,
+    stats::{find_char_boundary, CodeStats, Report},
 };

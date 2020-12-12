@@ -1,9 +1,10 @@
 # Contributing to Tokei
 
-* [Language Addition](#language-addition)
-* [Bug Reports](#bug-reports)
+- [Language Addition](#language-addition)
+- [Bug Reports](#bug-reports)
 
 # Language Addition
+
 Currently tokei generates languages from the [`languages.json`](languages.json)
 file. JSON was decided to make it easy to add new languages, and change code
 structure without changing large data structures. Here we will go over the
@@ -22,7 +23,7 @@ properties of a language in `languages.json`, through examples.
 Above is the JavaScript's definition. The first thing that needs to be defined
 is the key, the keys format should be same as [Rust's enum style]. As this key
 will be used in an enum for identifying the language. For a lot of language's
-this also works for showing the language when we print to the screen. 
+this also works for showing the language when we print to the screen.
 
 However there are some languages whose names don't work with the enum style.
 For example `JSON` is usually shown in all caps, but that doesn't fit in Rust's
@@ -43,8 +44,8 @@ let x = 5; // default x position
 let y = 0; // default y position
 ```
 
-The `line_comment` property expects an array of strings, as some languages have 
-multiple syntaxes for defining a a single line comment. For example `PHP` allows
+The `line_comment` property expects an array of strings, as some languages have
+multiple syntaxes for defining a single line comment. For example `PHP` allows
 both `#` and `//` as comments.
 
 ```json
@@ -62,6 +63,24 @@ property.
 let x = /* There is a reason
     for this comment I swear */
     10;
+```
+
+The `verbatim_quotes` property expects an array of strings, as some languages
+have multiple syntaxes for defining verbatim strings. A verbatim string
+in the context of Tokei is a string literal that can have unescaped `"`s. For example [`CSharp`](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/strings/#regular-and-verbatim-string-literals)
+
+```json
+"CSharp": {
+  "verbatim_quotes": [
+    [
+      "@\\\"",
+      "\\\""
+    ]
+  ]
+```
+
+```csharp
+const string BasePath = @"C:\";
 ```
 
 Some languages have a single, standard filename with no extension
@@ -102,6 +121,7 @@ detected as a `CMake` file, not a `Text` file.
 ```
 
 # Tests
+
 A test file is required with language additions. The file should
 contain every variant comments and quotes, as well as a comment
 at the top of the file containing the manually verified lines,
@@ -112,19 +132,22 @@ NUM lines NUM code NUM comments NUM blanks
 ```
 
 ### Example
-```
-// 39 lines 32 code 2 comments 5 blanks
+
+```rust
+//! 39 lines 32 code 2 comments 5 blanks
 ```
 
 The comment should use the syntax of the language you're testing.
 A good example of a test file is [`tests/data/rust.rs`].
 
 ```rust
-// 39 lines 32 code 2 comments 5 blanks
+// 41 lines 33 code 3 comments 5 blanks
 
 /* /**/ */
 fn main() {
-    let start = "/*";
+    let start = r##"/*\"
+\"##;
+    // comment
     loop {
         if x.len() >= 2 && x[0] == '*' && x[1] == '/' { // found the */
             break;
@@ -132,7 +155,7 @@ fn main() {
     }
 }
 
-fn foo() {
+fn foo<'a, 'b>(name: &'b str) {
     let this_ends = "a \"test/*.";
     call1();
     call2();
@@ -158,9 +181,11 @@ fn foo() {
     let b = 5;
     let c = 6; // */
 }
+
 ```
 
 # Bug Reports
+
 Please include the error message, and a minimum working example
 including the file, or file structure.
 
@@ -172,5 +197,5 @@ This file crashes the program.
 \`\`\`
 ```
 
-[Rust's enum style]: (https://github.com/rust-lang/rfcs/blob/master/text/0430-finalizing-naming-conventions.md#general-naming-conventions)
+[rust's enum style]: (https://github.com/rust-lang/rfcs/blob/master/text/0430-finalizing-naming-conventions.md#general-naming-conventions)
 [`tests/data/rust.rs`]: https://github.com/XAMPPRocky/tokei/blob/master/tests/data/rust.rs

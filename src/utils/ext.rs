@@ -1,21 +1,75 @@
 //! Various extensions to Rust std types.
 
 pub(crate) trait AsciiExt {
-    fn is_whitespace(&self) -> bool;
+    fn is_whitespace(self) -> bool;
+    fn is_not_line_ending_whitespace(self) -> bool;
+    fn is_line_ending_whitespace(self) -> bool;
 }
 
 impl AsciiExt for u8 {
-    fn is_whitespace(&self) -> bool {
-        *self == b' ' || (b'\x09'..=b'\x0d').contains(self)
+    fn is_whitespace(self) -> bool {
+        self == b' ' || (b'\x09'..=b'\x0d').contains(&self)
+    }
+
+    fn is_not_line_ending_whitespace(self) -> bool {
+        self.is_whitespace() && !self.is_line_ending_whitespace()
+    }
+
+    fn is_line_ending_whitespace(self) -> bool {
+        self == b'\n'
     }
 }
 
 pub(crate) trait SliceExt {
+    fn trim_first_and_last_line_of_whitespace(&self) -> &Self;
+    fn trim_start(&self) -> &Self;
     fn trim(&self) -> &Self;
     fn contains_slice(&self, needle: &Self) -> bool;
 }
 
 impl SliceExt for [u8] {
+    fn trim_first_and_last_line_of_whitespace(&self) -> &Self {
+        let start = self
+            .iter()
+            .position(|c| c.is_line_ending_whitespace() || !c.is_whitespace())
+            .map_or(0, |i| (i + 1).min(self.len().saturating_sub(1)));
+
+        let end = self
+            .iter()
+            .rposition(|c| c.is_line_ending_whitespace() || !c.is_whitespace())
+            .map_or_else(
+                || self.len(),
+                |i| {
+                    if self[i.saturating_sub(1)] == b'\r' {
+                        i - 1
+                    } else {
+                        i
+                    }
+                },
+            );
+
+        if self[start..].is_empty() {
+            return &[];
+        }
+
+        &self[start..=end]
+    }
+
+    fn trim_start(&self) -> &Self {
+        let length = self.len();
+
+        if length == 0 {
+            return &self;
+        }
+
+        let start = match self.iter().position(|c| !c.is_whitespace()) {
+            Some(start) => start,
+            None => return &[],
+        };
+
+        &self[start..]
+    }
+
     fn trim(&self) -> &Self {
         let length = self.len();
 

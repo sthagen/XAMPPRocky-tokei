@@ -1,20 +1,17 @@
-#[macro_use]
-extern crate lazy_static;
 extern crate ignore;
 extern crate regex;
 extern crate tokei;
 
 use std::fs;
 
+use once_cell::sync::Lazy;
 use regex::Regex;
 use tokei::{Config, Languages};
 
-lazy_static! {
-    static ref LINES: Regex = Regex::new(r"\d+ lines").unwrap();
-    static ref CODE: Regex = Regex::new(r"\d+ code").unwrap();
-    static ref COMMENTS: Regex = Regex::new(r"\d+ comments").unwrap();
-    static ref BLANKS: Regex = Regex::new(r"\d+ blanks").unwrap();
-}
+static LINES: Lazy<Regex> = Lazy::new(|| Regex::new(r"\d+ lines").unwrap());
+static CODE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\d+ code").unwrap());
+static COMMENTS: Lazy<Regex> = Lazy::new(|| Regex::new(r"\d+ comments").unwrap());
+static BLANKS: Lazy<Regex> = Lazy::new(|| Regex::new(r"\d+ blanks").unwrap());
 
 macro_rules! get_digit {
     ($regex:expr, $text:expr) => {{
@@ -81,10 +78,10 @@ mod config {
 
         let (_, language) = languages.into_iter().next().unwrap();
 
-        assert_eq!(language.lines, 15);
-        assert_eq!(language.code, 5);
-        assert_eq!(language.comments, 7);
+        assert_eq!(language.lines(), 15);
         assert_eq!(language.blanks, 3);
+        assert_eq!(language.comments, 7);
+        assert_eq!(language.code, 5);
     }
 }
 

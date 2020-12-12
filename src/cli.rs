@@ -1,4 +1,5 @@
 use std::mem;
+use std::process;
 
 use clap::{clap_app, crate_description, ArgMatches};
 use tokei::{Config, LanguageType, Sort};
@@ -13,11 +14,13 @@ pub struct Cli<'a> {
     pub hidden: bool,
     pub no_ignore: bool,
     pub no_ignore_parent: bool,
+    pub no_ignore_dot: bool,
     pub no_ignore_vcs: bool,
     pub output: Option<Format>,
     pub print_languages: bool,
     pub sort: Option<Sort>,
     pub types: Option<Vec<LanguageType>>,
+    pub number_format: num_format::CustomFormat,
     pub verbose: u64,
 }
 
@@ -26,7 +29,12 @@ impl<'a> Cli<'a> {
         let matches = clap_app!(tokei =>
             (version: &*crate_version())
             (author: "Erin P. <xampprocky@gmail.com> + Contributors")
-            (about: crate_description!())
+            (about: concat!(
+                    crate_description!(),
+                    "\n",
+                    "Support this project on GitHub Sponsors: https://github.com/sponsors/XAMPPRocky"
+                )
+            )
             (@arg columns: -c --columns
                 +takes_value
                 conflicts_with[output]
@@ -50,11 +58,17 @@ impl<'a> Cli<'a> {
                 conflicts_with[input]
                 "Prints out supported languages and their extensions.")
             (@arg no_ignore: --("no-ignore")
-                "Don't respect ignore files.")
+                "Don't respect ignore files (.gitignore, .ignore, etc.). This implies \
+                --no-ignore-parent, --no-ignore-dot, and --no-ignore-vcs.")
             (@arg no_ignore_parent: --("no-ignore-parent")
-                "Don't respect ignore files in parent directories.")
+                "Don't respect ignore files (.gitignore, .ignore, etc.) in parent \
+                directories.")
+            (@arg no_ignore_dot: --("no-ignore-dot")
+                "Don't respect .ignore and .tokeignore files, including those in \
+                parent directories.")
             (@arg no_ignore_vcs: --("no-ignore-vcs")
-                "Don't respect VCS (.gitignore, .hgignore, etc) ignore files.")
+                "Don't respect VCS ignore files (.gitignore, .hgignore, etc.), including \
+                those in parent directories.")
             (@arg output: -o --output
                 // `all` is used so to fail later with a better error
                 possible_values(Format::all())
@@ -69,6 +83,12 @@ impl<'a> Cli<'a> {
             (@arg types: -t --type
                 +takes_value
                 "Filters output by language type, seperated by a comma. i.e. -t=Rust,Markdown")
+            (@arg num_format_style: -n --("num-format")
+                possible_values(NumberFormatStyle::all())
+                conflicts_with[output]
+                +takes_value
+                "Format of printed numbers, i.e. plain (1234, default), commas (1,234), dots \
+                 (1.234), or underscores (1_234). Cannot be used with --output.")
             (@arg verbose: -v --verbose ...
             "Set log output level:
             1: to show unknown file extensions,
@@ -82,6 +102,7 @@ impl<'a> Cli<'a> {
         let hidden = matches.is_present("hidden");
         let no_ignore = matches.is_present("no_ignore");
         let no_ignore_parent = matches.is_present("no_ignore_parent");
+        let no_ignore_dot = matches.is_present("no_ignore_dot");
         let no_ignore_vcs = matches.is_present("no_ignore_vcs");
         let print_languages = matches.is_present("languages");
         let verbose = matches.occurrences_of("verbose");
@@ -91,6 +112,19 @@ impl<'a> Cli<'a> {
                 .filter_map(Result::ok)
                 .collect()
         });
+
+        let num_format_style: NumberFormatStyle = matches
+            .value_of("num_format_style")
+            .map(parse_or_exit::<NumberFormatStyle>)
+            .unwrap_or_default();
+
+        let number_format = match num_format_style.get_format() {
+            Ok(format) => format,
+            Err(e) => {
+                eprintln!("Error:\n{}", e);
+                process::exit(1);
+            }
+        };
 
         // Sorting category should be restricted by clap but parse before we do
         // work just in case.
@@ -109,12 +143,14 @@ impl<'a> Cli<'a> {
             matches,
             no_ignore,
             no_ignore_parent,
+            no_ignore_dot,
             no_ignore_vcs,
             output,
             print_languages,
             sort,
             types,
             verbose,
+            number_format,
         };
 
         debug!("CLI Config: {:#?}", cli);
@@ -154,6 +190,7 @@ impl<'a> Cli<'a> {
     /// #### Shared options
     /// * `no_ignore`
     /// * `no_ignore_parent`
+    /// * `no_ignore_dot`
     /// * `no_ignore_vcs`
     /// * `types`
     pub fn override_config(&mut self, mut config: Config) -> Config {
@@ -173,6 +210,12 @@ impl<'a> Cli<'a> {
             Some(true)
         } else {
             config.no_ignore_parent
+        };
+
+        config.no_ignore_dot = if self.no_ignore_dot {
+            Some(true)
+        } else {
+            config.no_ignore_dot
         };
 
         config.no_ignore_vcs = if self.no_ignore_vcs {

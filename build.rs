@@ -1,4 +1,3 @@
-extern crate handlebars;
 extern crate ignore;
 extern crate serde_json;
 
@@ -7,7 +6,6 @@ use std::fs::{self, File};
 use std::path::Path;
 use std::{cmp, env, error};
 
-use handlebars::Handlebars;
 use ignore::Walk;
 use serde_json::Value;
 
@@ -20,11 +18,7 @@ fn main() -> Result<(), Box<dyn error::Error>> {
 }
 
 fn generate_languages(out_dir: &OsStr) -> Result<(), Box<dyn error::Error>> {
-    let handlebars = {
-        let mut h = Handlebars::new();
-        h.register_escape_fn(handlebars::no_escape);
-        h
-    };
+    let mut tera = tera::Tera::default();
 
     let mut json: Value = serde_json::from_reader(File::open(&"languages.json")?)?;
 
@@ -46,14 +40,17 @@ fn generate_languages(out_dir: &OsStr) -> Result<(), Box<dyn error::Error>> {
         }
 
         sort_prop!("quotes");
+        sort_prop!("verbatim_quotes");
         sort_prop!("multi_line");
     }
 
-    let output = Path::new(&out_dir).join("language_type.rs");
-    let mut source_template = File::open(&"src/language/language_type.hbs.rs")?;
-    let mut output_file = File::create(&output)?;
+    let output_path = Path::new(&out_dir).join("language_type.rs");
+    let rust_code = tera.render_str(
+        &std::fs::read_to_string("src/language/language_type.tera.rs")?,
+        &tera::Context::from_value(json)?,
+    )?;
+    std::fs::write(output_path, rust_code)?;
 
-    handlebars.render_template_source_to_write(&mut source_template, &json, &mut output_file)?;
     Ok(())
 }
 
@@ -86,13 +83,19 @@ fn generate_tests(out_dir: &OsStr) -> Result<(), Box<dyn error::Error>> {
     for path in walker {
         let path = path?;
         let path = path.path();
+        let root = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
 
         let name = path.file_stem().unwrap().to_str().unwrap().to_lowercase();
 
+        if name == "jupyter" {
+            continue;
+        }
+
         string.push_str(&format!(
-            r#"
+            r####"
         #[test]
         fn {0}() {{
+            const _: &str = include_str!(r###"{2}"###);
             let mut languages = Languages::new();
             languages.get_statistics(&["{1}"], &[], &Config::default());
 
@@ -101,11 +104,13 @@ fn generate_tests(out_dir: &OsStr) -> Result<(), Box<dyn error::Error>> {
                        languages.into_iter().collect::<Vec<_>>());
             }}
 
-            let (name, mut language) = languages.into_iter().next().unwrap();
+            let (name, language) = languages.into_iter().next().unwrap();
+            let mut language = language.summarise();
 
             let contents = fs::read_to_string("{1}").unwrap();
 
-            assert_eq!(get_digit!(LINES, contents), language.lines);
+            println!("{{}} {1}", name);
+            assert_eq!(get_digit!(LINES, contents), language.lines());
             println!("{{}} LINES MATCH", name);
             assert_eq!(get_digit!(CODE, contents), language.code);
             println!("{{}} CODE MATCH", name);
@@ -114,16 +119,18 @@ fn generate_tests(out_dir: &OsStr) -> Result<(), Box<dyn error::Error>> {
             assert_eq!(get_digit!(BLANKS, contents), language.blanks);
             println!("{{}} BLANKS MATCH", name);
 
-            let stats = language.stats.pop().unwrap();
+            let report = language.reports.pop().unwrap();
+            let stats = report.stats.summarise();
 
-            assert_eq!(language.lines, stats.lines);
+            assert_eq!(language.lines(), stats.lines());
             assert_eq!(language.code, stats.code);
             assert_eq!(language.comments, stats.comments);
             assert_eq!(language.blanks, stats.blanks);
         }}
-        "#,
+        "####,
             name,
-            path.display()
+            path.display(),
+            std::fs::canonicalize(root.join(path)).unwrap().display(),
         ));
     }
 
