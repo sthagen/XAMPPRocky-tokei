@@ -1,10 +1,31 @@
 use std::mem;
 use std::process;
 
-use clap::{clap_app, crate_description, ArgMatches};
+use clap::{clap_app, crate_description, AppSettings, ArgMatches};
 use tokei::{Config, LanguageType, Sort};
 
 use crate::{cli_utils::*, input::Format};
+
+/// Used for sorting languages.
+#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub enum Streaming {
+    /// simple lines.
+    Simple,
+    /// Json outputs.
+    Json,
+}
+
+impl std::str::FromStr for Streaming {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s.to_lowercase().as_ref() {
+            "simple" => Streaming::Simple,
+            "json" => Streaming::Json,
+            s => return Err(format!("Unsupported streaming option: {}", s)),
+        })
+    }
+}
 
 #[derive(Debug)]
 pub struct Cli<'a> {
@@ -17,6 +38,7 @@ pub struct Cli<'a> {
     pub no_ignore_dot: bool,
     pub no_ignore_vcs: bool,
     pub output: Option<Format>,
+    pub streaming: Option<Streaming>,
     pub print_languages: bool,
     pub sort: Option<Sort>,
     pub types: Option<Vec<LanguageType>>,
@@ -36,6 +58,7 @@ impl<'a> Cli<'a> {
                     "Support this project on GitHub Sponsors: https://github.com/sponsors/XAMPPRocky"
                 )
             )
+            (setting: AppSettings::ColoredHelp)
             (@arg columns: -c --columns
                 +takes_value
                 conflicts_with[output]
@@ -76,6 +99,11 @@ impl<'a> Cli<'a> {
                 +takes_value
                 "Outputs Tokei in a specific format. Compile with additional features for more \
                 format support.")
+            (@arg streaming: --streaming
+                possible_values(&["simple", "json"])
+                case_insensitive(true)
+                +takes_value
+                "prints the (language, path, lines, blanks, code, comments) records as simple lines or as Json for batch processing")
             (@arg sort: -s --sort
                 possible_values(&["files", "lines", "blanks", "code", "comments"])
                 case_insensitive(true)
@@ -83,7 +111,7 @@ impl<'a> Cli<'a> {
                 "Sort languages based on column")
             (@arg types: -t --type
                 +takes_value
-                "Filters output by language type, seperated by a comma. i.e. -t=Rust,Markdown")
+                "Filters output by language type, separated by a comma. i.e. -t=Rust,Markdown")
             (@arg compact: -C --compact
                 "Do not print statistics about embedded languages.")
             (@arg num_format_style: -n --("num-format")
@@ -137,25 +165,29 @@ impl<'a> Cli<'a> {
         // is supported) but this will fail if support is not compiled in and
         // give a useful error to the user.
         let output = matches.value_of("output").map(parse_or_exit::<Format>);
+        let streaming = matches
+            .value_of("streaming")
+            .map(parse_or_exit::<Streaming>);
 
         crate::cli_utils::setup_logger(verbose);
 
         let cli = Cli {
+            matches,
             columns,
             files,
             hidden,
-            matches,
             no_ignore,
             no_ignore_parent,
             no_ignore_dot,
             no_ignore_vcs,
             output,
+            streaming,
             print_languages,
             sort,
             types,
-            verbose,
-            number_format,
             compact,
+            number_format,
+            verbose,
         };
 
         debug!("CLI Config: {:#?}", cli);
@@ -183,8 +215,8 @@ impl<'a> Cli<'a> {
     }
 
     pub fn print_supported_languages() {
-        for key in LanguageType::list() {
-            println!("{:<25}", key);
+        for (key, extensions) in LanguageType::list() {
+            println!("{} ({})", format!("{}", key), extensions.join(", "));
         }
     }
 
@@ -227,6 +259,24 @@ impl<'a> Cli<'a> {
             Some(true)
         } else {
             config.no_ignore_vcs
+        };
+
+        config.for_each_fn = match self.streaming {
+            Some(Streaming::Json) => Some(|l: LanguageType, e| {
+                println!("{}", serde_json::json!({"language": l.name(), "stats": e}))
+            }),
+            Some(Streaming::Simple) => Some(|l: LanguageType, e| {
+                println!(
+                    "{:>10} {:<80} {:>12} {:>12} {:>12} {:>12}",
+                    l.name(),
+                    e.name.to_string_lossy().to_string(),
+                    e.stats.lines(),
+                    e.stats.code,
+                    e.stats.comments,
+                    e.stats.blanks
+                )
+            }),
+            _ => None,
         };
 
         config.types = mem::replace(&mut self.types, None).or(config.types);

@@ -6,6 +6,7 @@ use std::{
 };
 
 use clap::crate_version;
+use colored::*;
 use num_format::ToFormattedString;
 
 use crate::input::Format;
@@ -152,12 +153,12 @@ impl<W: Write> Printer<W> {
         writeln!(
             self.writer,
             " {:<6$} {:>12} {:>12} {:>12} {:>12} {:>12}",
-            "Language",
-            "Files",
-            "Lines",
-            "Code",
-            "Comments",
-            "Blanks",
+            "Language".bold().blue(),
+            "Files".bold().blue(),
+            "Lines".bold().blue(),
+            "Code".bold().blue(),
+            "Comments".bold().blue(),
+            "Blanks".bold().blue(),
             self.columns - NO_LANG_HEADER_ROW_LEN
         )?;
         self.print_row()
@@ -205,11 +206,24 @@ impl<W: Write> Printer<W> {
                 .values()
                 .map(Vec::len)
                 .sum::<usize>()
-                .to_formatted_string(&self.number_format),
-            language.lines().to_formatted_string(&self.number_format),
-            language.code.to_formatted_string(&self.number_format),
-            language.comments.to_formatted_string(&self.number_format),
-            language.blanks.to_formatted_string(&self.number_format),
+                .to_formatted_string(&self.number_format)
+                .blue(),
+            language
+                .lines()
+                .to_formatted_string(&self.number_format)
+                .blue(),
+            language
+                .code
+                .to_formatted_string(&self.number_format)
+                .blue(),
+            language
+                .comments
+                .to_formatted_string(&self.number_format)
+                .blue(),
+            language
+                .blanks
+                .to_formatted_string(&self.number_format)
+                .blue(),
         )
     }
 
@@ -233,7 +247,12 @@ impl<W: Write> Printer<W> {
             write!(self.writer, " {:.len$}", name, len = lang_section_len - 1)?;
             write!(self.writer, "|")?;
         } else {
-            write!(self.writer, " {:<len$}", name, len = lang_section_len)?;
+            write!(
+                self.writer,
+                " {:<len$}",
+                name.bold(),
+                len = lang_section_len
+            )?;
         }
         if inaccurate {
             write!(self.writer, "{}", IDENT_INACCURATE)?;
@@ -317,42 +336,50 @@ impl<W: Write> Printer<W> {
                 }
 
                 if self.list_files {
-                    self.print_subrow()?;
-                    let (a, b): (Vec<_>, Vec<_>) = language
-                        .reports
-                        .iter()
-                        .partition(|r| r.stats.blobs.is_empty());
-                    for reports in &[&a, &b] {
-                        let mut first = true;
-                        for report in reports.iter() {
-                            if !report.stats.blobs.is_empty() {
-                                if first && a.is_empty() {
-                                    writeln!(self.writer, " {}", report.name.display())?;
-                                    first = false;
-                                } else {
+                    if !compact {
+                        self.print_subrow()?;
+                        let (a, b): (Vec<_>, Vec<_>) = language
+                            .reports
+                            .iter()
+                            .partition(|r| r.stats.blobs.is_empty());
+                        for reports in &[&a, &b] {
+                            let mut first = true;
+                            for report in reports.iter() {
+                                if !report.stats.blobs.is_empty() {
+                                    if first && a.is_empty() {
+                                        writeln!(self.writer, " {}", report.name.display())?;
+                                        first = false;
+                                    } else {
+                                        writeln!(
+                                            self.writer,
+                                            "-- {} {}",
+                                            report.name.display(),
+                                            "-".repeat(
+                                                self.columns
+                                                    - 4
+                                                    - report.name.display().to_string().len()
+                                            )
+                                        )?;
+                                    }
+                                    let mut new_report = (*report).clone();
+                                    new_report.name = name.to_string().into();
                                     writeln!(
                                         self.writer,
-                                        "-- {} {}",
-                                        report.name.display(),
-                                        "-".repeat(
-                                            self.columns
-                                                - 4
-                                                - report.name.display().to_string().len()
-                                        )
+                                        " |-{:1$}",
+                                        new_report,
+                                        self.path_length - 3
                                     )?;
+                                    self.print_report_total(&report, language.inaccurate)?;
+                                } else {
+                                    writeln!(self.writer, "{:1$}", report, self.path_length)?;
                                 }
-                                let mut new_report = (*report).clone();
-                                new_report.name = name.to_string().into();
-                                writeln!(
-                                    self.writer,
-                                    " |-{:1$}",
-                                    new_report,
-                                    self.path_length - 3
-                                )?;
-                                self.print_report_total(&report, language.inaccurate)?;
-                            } else {
-                                writeln!(self.writer, "{:1$}", report, self.path_length)?;
                             }
+                        }
+                    } else {
+                        // compact format
+                        self.print_subrow()?;
+                        for report in &language.reports {
+                            writeln!(self.writer, "{:1$}", report, self.path_length)?;
                         }
                     }
                 }
@@ -367,7 +394,7 @@ impl<W: Write> Printer<W> {
     }
 
     fn print_subrow(&mut self) -> io::Result<()> {
-        writeln!(self.writer, "{}", self.subrow)
+        writeln!(self.writer, "{}", self.subrow.dimmed())
     }
 
     fn print_report(
