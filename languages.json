@@ -82,6 +82,18 @@
         "webinfo"
       ]
     },
+    "Ats": {
+      "name": "ATS",
+      "line_comment": ["//"],
+      "multi_line_comments": [["(*", "*)"], ["/*", "*/"]],
+      "quotes": [["\\\"", "\\\""]],
+      "extensions": [
+        "dats",
+        "hats",
+        "sats",
+        "atxt"
+      ]
+    },
     "Autoconf": {
       "line_comment": ["#", "dnl"],
       "extensions": ["in"]
@@ -651,6 +663,12 @@
       ],
       "extensions": ["js", "mjs"]
     },
+    "Jinja2": {
+      "name": "Jinja2",
+      "blank": true,
+      "extensions": ["j2"],
+      "multi_line_comments": [["{#", "#}"]]
+    },
     "Json": {
       "name": "JSON",
       "blank": true,
@@ -1050,7 +1068,8 @@
       "line_comment": [";"],
       "multi_line_comments": [["#|", "|#"]],
       "nested": true,
-      "extensions": ["rkt"]
+      "env": ["racket"],
+      "extensions": ["rkt", "scrbl"]
     },
     "Rakefile": {
       "line_comment": ["#"],
