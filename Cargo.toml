@@ -41,7 +41,7 @@ aho-corasick = "0.7.15"
 arbitrary = { version="1.0.1", features=["derive"] }
 clap = { version = "2.33.3", features = ["wrap_help"] }
 colored = "2"
-crossbeam-channel = "0.5.0"
+crossbeam-channel = "0.5.2"
 encoding_rs_io = "0.1.7"
 grep-searcher = "0.1.8"
 ignore = "0.4.18"
