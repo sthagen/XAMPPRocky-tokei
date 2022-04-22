@@ -60,7 +60,7 @@ dirs = "4"
 
 [dependencies.env_logger]
 features = []
-version = "0.8"
+version = "0.9"
 
 [dependencies.hex]
 optional = true
