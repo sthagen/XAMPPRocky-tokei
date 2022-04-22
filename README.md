@@ -206,9 +206,6 @@ tokei with the features flag.
   ALL:
   cargo install tokei --features all
 
-  JSON:
-  cargo install tokei --features json
-
   CBOR:
   cargo install tokei --features cbor
 
@@ -226,7 +223,7 @@ $ tokei ./foo --output json
 ```
 
 #### Reading in stored formats
-Tokei can also take in the outputted formats added in the previous results to it's
+Tokei can also take in the outputted formats added in the previous results to its
 current run. Tokei can take either a path to a file, the format passed in as a
 value to the option, or from stdin.
 
