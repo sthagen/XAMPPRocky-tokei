@@ -342,6 +342,8 @@ Crystal
 CSharp
 CShell
 Css
+Cuda
+Cython
 D
 DAML
 Dart
@@ -484,6 +486,7 @@ Toml
 Tsx
 Twig
 TypeScript
+UMPL
 UnrealDeveloperMarkdown
 UnrealPlugin
 UnrealProject
