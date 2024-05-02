@@ -424,6 +424,7 @@ Ini
 IntelHex
 Isabelle
 Jai
+Janet
 Java
 JavaScript
 Jq
@@ -463,6 +464,7 @@ ObjectiveC
 ObjectiveCpp
 OCaml
 Odin
+OpenQASM
 Org
 Oz
 Pascal
@@ -552,6 +554,7 @@ Xtend
 Yaml
 ZenCode
 Zig
+ZoKrates
 Zsh
 ```
 

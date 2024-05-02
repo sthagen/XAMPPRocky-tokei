@@ -719,6 +719,11 @@
       "extensions": ["jai"],
       "nested": true
     },
+    "Janet": {
+      "line_comment": ["#"],
+      "quotes": [["\\\"", "\\\""], ["'", "'"], ["`", "`"]],
+      "extensions": ["janet"]
+    },
     "Java": {
       "line_comment": ["//"],
       "multi_line_comments": [["/*", "*/"]],
@@ -825,6 +830,13 @@
       "env": ["ksh"],
       "extensions": ["ksh"]
     },
+    "Lalrpop": {
+      "name": "LALRPOP",
+      "line_comment": ["//"],
+      "extensions": ["lalrpop"],
+      "quotes": [["\\\"", "\\\""], ["#\\\"", "\\\"#"]],
+      "verbatim_quotes": [["r##\\\"", "\\\"##"], ["r#\\\"", "\\\"#"]]
+    },
     "KvLanguage": {
       "name":"KV Language",
       "line_comment": ["# "],
@@ -901,7 +913,7 @@
       "line_comment": ["--"],
       "multi_line_comments": [["--[[", "]]"]],
       "quotes": [["\\\"", "\\\""], ["'", "'"]],
-      "extensions": ["lua"]
+      "extensions": ["lua", "luau"]
     },
     "Lucius": {
       "line_comment": ["//"],
@@ -1043,6 +1055,12 @@
       "quotes": [["\\\"","\\\""], ["`", "`"]],
       "extensions": ["rego"]
     },
+    "OpenQasm": {
+      "name": "OpenQASM",
+      "line_comment": ["//"],
+      "multi_line_comments": [["/*", "*/"]],
+      "extensions": ["qasm"]
+    },
     "OpenType": {
       "name": "OpenType Feature File",
       "line_comment": ["#"],
@@ -1179,7 +1197,13 @@
       "quotes": [["\\\"", "\\\""], ["'", "'"]],
       "env": ["python", "python2", "python3"],
       "mime": ["text/x-python"],
-      "extensions": ["py", "pyw"]
+      "extensions": ["py", "pyw", "pyi"]
+    },
+    "PRQL": {
+      "line_comment": ["#"],
+      "quotes": [["\\\"", "\\\""], ["'", "'"]],
+      "mime": ["application/prql"],
+      "extensions": ["prql"]
     },
     "Q": {
       "name": "Q",
@@ -1386,6 +1410,13 @@
       "multi_line_comments": [["\\\"", "\\\""]],
       "extensions": ["cs.st", "pck.st"]
     },
+    "Snakemake": {
+      "line_comment": ["#"],
+      "doc_quotes": [["\\\"\\\"\\\"", "\\\"\\\"\\\""], ["'''", "'''"]],
+      "quotes": [["\\\"", "\\\""], ["'", "'"]],
+      "extensions": ["smk", "rules"],
+      "filenames": ["snakefile"]
+    },
     "Solidity": {
       "name": "Solidity",
       "line_comment": ["//"],
@@ -1540,6 +1571,13 @@
       "multi_line_comments": [["/*", "*/"]],
       "quotes": [["\\\"", "\\\""], ["'", "'"], ["`", "`"]],
       "extensions": ["ts", "mts", "cts"]
+    },
+    "Typst": {
+      "nested": true,
+      "line_comment": ["//"],
+      "multi_line_comments": [["/*", "*/"]],
+      "quotes": [["\\\"", "\\\""]],
+      "extensions": ["typ"]
     },
     "UMPL": {
       "line_comment": ["!"],
@@ -1737,6 +1775,12 @@
       "line_comment": ["//"],
       "quotes": [["\\\"", "\\\""]],
       "extensions": ["zig"]
+    },
+    "Zokrates": {
+      "name": "ZoKrates",
+      "line_comment": ["//"],
+      "multi_line_comments": [["/*", "*/"]],
+      "extensions": ["zok"]
     },
     "Zsh": {
       "shebangs": ["#!/bin/zsh"],
