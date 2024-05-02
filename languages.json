@@ -181,12 +181,23 @@
       "quotes": [["\\\"", "\\\""], ["\\\"\\\"\\\"", "\\\"\\\"\\\""]],
       "extensions": ["ceylon"]
     },
+    "Chapel": {
+      "line_comment": ["//"],
+      "multi_line_comments": [["/*", "*/"]],
+      "quotes": [["\\\"", "\\\""], ["'", "'"]],
+      "extensions": ["chpl"]
+    },
     "CHeader": {
       "name": "C Header",
       "line_comment": ["//"],
       "multi_line_comments": [["/*", "*/"]],
       "quotes": [["\\\"", "\\\""]],
       "extensions": ["h"]
+    },
+    "Circom": {
+      "line_comment": ["//"],
+      "multi_line_comments": [["/*", "*/"]],
+      "extensions": ["circom"]
     },
     "Clojure": {
       "line_comment": [";"],
@@ -607,6 +618,10 @@
       "quotes": [["\\\"", "\\\""], ["'", "'"]],
       "extensions": ["hbs", "handlebars"]
     },
+    "Hare": {
+      "line_comment": ["//"],
+      "extensions": ["ha"]
+    },
     "Haskell": {
       "nested": true,
       "line_comment": ["--"],
@@ -836,6 +851,15 @@
       "extensions": ["liquid"],
       "multi_line_comments": [["<!--", "-->"], ["{% comment %}", "{% endcomment %}"]]
     },
+    "LinguaFranca": {
+      "name": "Lingua Franca",
+      "line_comment": ["//", "#"],
+      "important_syntax": ["{="],
+      "multi_line_comments": [["/*", "*/"]],
+      "quotes": [["\\\"", "\\\""]],
+      "nested": true,
+      "extensions": ["lf"]
+    },
     "LinkerScript": {
       "name": "LD Script",
       "multi_line_comments": [["/*", "*/"]],
@@ -904,6 +928,9 @@
       "literate": true,
       "important_syntax": ["```"],
       "extensions": ["md", "markdown"]
+    },
+    "Max": {
+      "extensions": ["maxpat"]
     },
     "Meson": {
       "line_comment": ["#"],
@@ -1030,6 +1057,12 @@
       "quotes": [["\\\"", "\\\""]],
       "multi_line_comments": [["/*", "*/"]],
       "extensions": ["oz"]
+    },
+    "PacmanMakepkg": {
+      "name": "Pacman's makepkg",
+      "line_comment": ["#"],
+      "quotes": [["\\\"", "\\\""], ["'", "'"]],
+      "filenames": ["pkgbuild"] 
     },
     "Pan": {
       "line_comment": ["#"],
@@ -1225,8 +1258,11 @@
       "extensions": ["raku", "rakumod", "rakutest", "pm6", "pl6", "p6"]
     },
     "Razor": {
-      "multi_line_comments": [["<!--", "-->"], ["@*", "*@"]],
-      "extensions": ["cshtml"]
+      "line_comment": ["//"],
+      "multi_line_comments": [["<!--", "-->"], ["@*", "*@"], ["/*", "*/"]],
+      "quotes": [["\\\"", "\\\""]],
+      "verbatim_quotes": [["@\\\"", "\\\""]],
+      "extensions": ["cshtml", "razor"]
     },
     "Redscript": {
       "name": "Redscript",
@@ -1330,6 +1366,13 @@
       "multi_line_comments": [["/*", "*/"]],
       "quotes": [["\\\"", "\\\""]],
       "extensions": ["shader", "cginc"]
+    },
+    "Slang": {
+      "name": "Slang",
+      "line_comment": ["//"],
+      "multi_line_comments": [["/*", "*/"]],
+      "quotes": [["\\\"", "\\\""]],
+      "extensions": ["slang"]
     },
     "Sml": {
       "name": "Standard ML (SML)",
@@ -1496,7 +1539,7 @@
       "line_comment": ["//"],
       "multi_line_comments": [["/*", "*/"]],
       "quotes": [["\\\"", "\\\""], ["'", "'"], ["`", "`"]],
-      "extensions": ["ts"]
+      "extensions": ["ts", "mts", "cts"]
     },
     "UMPL": {
       "line_comment": ["!"],

@@ -410,6 +410,7 @@ Gwion
 Hamlet
 Handlebars
 Happy
+Hare
 Haskell
 Haxe
 Hcl
@@ -434,6 +435,7 @@ KakouneScript
 Kotlin
 Lean
 Less
+Lingua Franca
 LinkerScript
 Liquid
 Lisp
@@ -442,6 +444,7 @@ Logtalk
 Lua
 Lucius
 Madlang
+Max
 Makefile
 Markdown
 Meson
@@ -497,6 +500,7 @@ Scheme
 Scons
 Sh
 ShaderLab
+Slang
 Sml
 Solidity
 SpecmanE
