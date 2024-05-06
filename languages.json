@@ -618,10 +618,6 @@
       "quotes": [["\\\"", "\\\""], ["'", "'"]],
       "extensions": ["hbs", "handlebars"]
     },
-    "Hare": {
-      "line_comment": ["//"],
-      "extensions": ["ha"]
-    },
     "Haskell": {
       "nested": true,
       "line_comment": ["--"],
@@ -757,7 +753,7 @@
     "Jinja2": {
       "name": "Jinja2",
       "blank": true,
-      "extensions": ["j2"],
+      "extensions": ["j2", "jinja"],
       "multi_line_comments": [["{#", "#}"]]
     },
     "Jq": {
