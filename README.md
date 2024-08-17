@@ -347,6 +347,7 @@ Bash
 Batch
 Bazel
 Bean
+Bicep
 Bitbake
 BrightScript
 C
@@ -354,6 +355,7 @@ Cabal
 Cassius
 Ceylon
 CHeader
+Cil
 Clojure
 ClojureC
 ClojureScript
@@ -371,8 +373,10 @@ CSharp
 CShell
 Css
 Cuda
+CUE
 Cython
 D
+D2
 DAML
 Dart
 DeviceTree
@@ -404,6 +408,7 @@ FSharp
 Fstar
 GDB
 GdScript
+GdShader
 Gherkin
 Gleam
 Glsl
@@ -419,6 +424,7 @@ Haskell
 Haxe
 Hcl
 Hex
+hledger
 Hlsl
 HolyC
 Html
@@ -452,10 +458,12 @@ Madlang
 Max
 Makefile
 Markdown
+Mdx
 Meson
 Mint
 Mlatu
 ModuleDef
+MonkeyC
 MoonScript
 MsBuild
 Mustache
@@ -477,6 +485,7 @@ Perl
 Perl6
 Pest
 Php
+Po
 Poke
 Polly
 Pony
@@ -485,6 +494,7 @@ PowerShell
 Processing
 Prolog
 Protobuf
+PRQL
 PSL
 PureScript
 Python
@@ -514,12 +524,14 @@ SpecmanE
 Spice
 Sql
 SRecode
+Stata
 Stratego
 Svelte
 Svg
 Swift
 Swig
 SystemVerilog
+Tact
 Tcl
 Tex
 Text
