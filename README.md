@@ -497,6 +497,7 @@ Protobuf
 PRQL
 PSL
 PureScript
+Pyret
 Python
 Qcl
 Qml
@@ -531,6 +532,7 @@ Svg
 Swift
 Swig
 SystemVerilog
+Slint
 Tact
 Tcl
 Tex

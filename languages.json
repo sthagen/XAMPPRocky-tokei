@@ -1006,7 +1006,7 @@
     "Makefile": {
       "line_comment": ["#"],
       "extensions": ["makefile", "mak", "mk"],
-      "filenames": ["makefile"]
+      "filenames": ["gnumakefile", "makefile"]
     },
     "Markdown": {
       "literate": true,
@@ -1320,6 +1320,13 @@
       "line_comment": ["--"],
       "multi_line_comments": [["{-", "-}"]],
       "extensions": ["purs"]
+    },
+    "Pyret": {
+      "line_comment": ["#"],
+      "multi_line_comments": [["#|", "|#"]],
+      "quotes": [["\\\"", "\\\""], ["'", "'"]],
+      "extensions": ["arr"],
+      "nested": true
     },
     "Python": {
       "line_comment": ["#"],
@@ -1641,6 +1648,12 @@
       "multi_line_comments": [["/*", "*/"]],
       "quotes": [["\\\"", "\\\""]],
       "extensions": ["sv", "svh"]
+    },
+    "Slint": {
+      "line_comment": ["//"],
+      "multi_line_comments": [["/*", "*/"]],
+      "quotes": [["\\\"", "\\\""]],
+      "extensions": ["slint"]
     },
     "Tact": {
       "line_comment": ["//"],
