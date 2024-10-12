@@ -874,6 +874,13 @@
       "name": "Jupyter Notebooks",
       "extensions": ["ipynb"]
     },
+    "Just": {
+      "shebangs": ["#!/usr/bin/env just --justfile"],
+      "env": ["just"],
+      "line_comment": ["#"],
+      "extensions": ["just"],
+      "filenames": ["justfile"]
+    },
     "K": {
       "name": "K",
       "nested": true,
@@ -1296,6 +1303,12 @@
         ["@'", "'@"]
       ],
       "extensions": ["ps1", "psm1", "psd1", "ps1xml", "cdxml", "pssc", "psc1"]
+    },
+    "PRACTICE": {
+      "name": "Lauterbach PRACTICE Script",
+      "line_comment": [";", "//"],
+      "quotes": [["\\\"", "\\\""]],
+      "extensions": ["cmm"]
     },
     "Processing": {
       "line_comment": ["//"],
@@ -1865,6 +1878,12 @@
       "line_comment": ["--"],
       "multi_line_comments": [["/*", "*/"]],
       "extensions": ["vhd", "vhdl"]
+    },
+    "Virgil": {
+      "line_comment": ["//"],
+      "multi_line_comments": [["/*", "*/"]],
+      "quotes": [["\\\"", "\\\""]],
+      "extensions": ["v3"]
     },
     "VisualBasic": {
       "name": "Visual Basic",
