@@ -167,7 +167,7 @@
       "name": "Bitbake",
       "line_comment": ["#"],
       "quotes": [["\\\"", "\\\""], ["'", "'"]],
-      "extensions": ["bb", "bbclass", "bbappend", "inc", "conf"]
+      "extensions": ["bb", "bbclass", "bbappend", "inc"]
     },
     "Bqn": {
       "name": "BQN",
@@ -191,6 +191,14 @@
       "line_comment": ["--"],
       "multi_line_comments": [["{-", "-}"]],
       "extensions": ["cabal"]
+    },
+    "Cairo": {
+      "line_comment": ["//"],
+      "extensions": ["cairo"],
+      "quotes": [
+        ["\\\"", "\\\""],
+        ["'", "'"]
+      ]
     },
     "Cangjie": {
       "line_comment": ["//"],
@@ -1780,6 +1788,11 @@
       "multi_line_comments": [["/*", "*/"]],
       "quotes": [["\\\"", "\\\""]],
       "extensions": ["typ"]
+    },
+    "Uiua": {
+      "line_comment": ["#"],
+      "quotes": [["\\\"", "\\\""]],
+      "extensions": ["ua"]
     },
     "UMPL": {
       "line_comment": ["!"],
