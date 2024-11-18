@@ -133,6 +133,14 @@
       "shebangs": ["#!/bin/awk -f"],
       "extensions": ["awk"]
     },
+    "Ballerina": {
+      "line_comment": ["//", "#"],
+      "quotes": [
+        ["\\\"", "\\\""],
+        ["`", "`"]
+      ],
+      "extensions": ["bal"]
+    },
     "Bash": {
       "name": "BASH",
       "shebangs": ["#!/bin/bash"],
@@ -1489,6 +1497,15 @@
     "ReStructuredText": {
       "blank": true,
       "extensions": ["rst"]
+    },
+    "Roc": {
+      "line_comment": ["#"],
+      "quotes": [
+        ["\\\"", "\\\""],
+        ["'", "'"]
+      ],
+      "doc_quotes": [["\\\"\\\"\\\"", "\\\"\\\"\\\""]],
+      "extensions": ["roc"]
     },
     "RON": {
       "name": "Rusty Object Notation",
