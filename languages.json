@@ -37,7 +37,7 @@
       "name": "APL",
       "line_comment": ["⍝"],
       "extensions": ["apl", "aplf", "apls"],
-      "quotes": [["'", "'"]],
+      "quotes": [["'", "'"]]
     },
     "Arduino": {
       "name": "Arduino C++",
@@ -45,6 +45,13 @@
       "multi_line_comments": [["/*", "*/"]],
       "quotes": [["\\\"", "\\\""]],
       "extensions": ["ino"]
+    },
+    "ArkTS": {
+      "name": "Ark TypeScript",
+      "line_comment": ["//"],
+      "multi_line_comments": [["/*", "*/"]],
+      "quotes": [["\\\"", "\\\""], ["'", "'"], ["`", "`"]],
+      "extensions": ["ets"]
     },
     "Arturo": {
       "line_comment": [";"],
@@ -187,7 +194,7 @@
       "name": "BQN",
       "line_comment": ["#"],
       "extensions": ["bqn"],
-      "quotes": [["\\\"", "\\\""], ["'", "'"]],
+      "quotes": [["\\\"", "\\\""], ["'", "'"]]
     },
     "BrightScript": {
       "quotes": [["\\\"", "\\\""]],
@@ -332,6 +339,14 @@
       "multi_line_comments": [["/*", "*/"]],
       "quotes": [["\\\"", "\\\""]],
       "extensions": ["hh", "hpp", "hxx", "inl", "ipp"]
+    },
+    "CppModule": {
+      "name": "C++ Module",
+      "line_comment": ["//"],
+      "multi_line_comments": [["/*", "*/"]],
+      "quotes": [["\\\"", "\\\""]],
+      "verbatim_quotes": [["R\\\"(", ")\\\""]],
+      "extensions": ["cppm", "ixx", "ccm", "mpp", "mxx", "cxxm", "hppm", "hxxm"]
     },
     "Crystal": {
       "line_comment": ["#"],
@@ -940,6 +955,13 @@
       "name": "Kaem",
       "line_comment": ["#"],
       "extensions": ["kaem"]
+    },
+    "Koka": {
+      "line_comment": ["//"],
+      "multi_line_comments": [["/*", "*/"]],
+      "nested": true,
+      "quotes": [["\\\"", "\\\""]],
+      "extensions": ["kk"]
     },
     "Kotlin": {
       "line_comment": ["//"],
